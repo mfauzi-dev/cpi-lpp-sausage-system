@@ -147,7 +147,7 @@ class LaporanPengendalianProdukSausageSheetDelapan extends LaporanPengendalianPr
                     $this->number($k->reject),
                 ])
                 ->values()
-                ->all()
+                ->all() 
         );
     }
 }
