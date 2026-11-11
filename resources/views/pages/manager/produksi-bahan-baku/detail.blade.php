@@ -368,6 +368,13 @@
 
                                     </th>
 
+
+                                    <th>
+
+                                        Total (Kg)
+
+                                    </th>
+
                                     <th>
 
                                         Kode Batch
@@ -383,12 +390,6 @@
                                     <th>
 
                                         Suhu RM (°C)
-
-                                    </th>
-
-                                    <th>
-
-                                        Total (Kg)
 
                                     </th>
 
@@ -418,10 +419,26 @@
                                             @if ($item->productFormula)
                                                 <span class="badge-soft">
 
-                                                    x{{ $item->productFormula->multiplier }} -
-                                                    {{ $item->productFormula->qty }}
+                                                    {{ $item->productFormula->multiplier }}
 
                                                 </span>
+                                            @else
+                                                <span class="value-empty">-</span>
+                                            @endif
+
+                                        </td>
+
+
+                                        <td>
+
+                                            @if ($item->productFormula)
+                                                <strong>
+
+                                                    {{ number_format($item->productFormula->total_kg, 2, ',', '.') }}
+
+                                                </strong>
+
+                                                Kg
                                             @else
                                                 <span class="value-empty">-</span>
                                             @endif
@@ -456,22 +473,6 @@
 
                                             @if ($item->suhu_rm !== null)
                                                 {{ $item->suhu_rm }} °C
-                                            @else
-                                                <span class="value-empty">-</span>
-                                            @endif
-
-                                        </td>
-
-                                        <td>
-
-                                            @if ($item->total_kg !== null)
-                                                <strong>
-
-                                                    {{ number_format($item->total_kg, 2, ',', '.') }}
-
-                                                </strong>
-
-                                                Kg
                                             @else
                                                 <span class="value-empty">-</span>
                                             @endif

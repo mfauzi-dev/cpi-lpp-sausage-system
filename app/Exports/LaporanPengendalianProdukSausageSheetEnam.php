@@ -16,7 +16,7 @@ class LaporanPengendalianProdukSausageSheetEnam extends LaporanPengendalianProdu
         $row = $this->table(
             $sheet,
             $row,
-            null,
+            'PENGEMASAN PLASTIK PACKING DALAM',
             ['Jenis Plastik', 'No. MD', 'Qty Pack', 'Pemakaian', 'Sisa', 'Reject Plastik'],
             $pb->pengemasanPlastikPackingDalams
                 ->map(fn ($p) => [
@@ -31,10 +31,10 @@ class LaporanPengendalianProdukSausageSheetEnam extends LaporanPengendalianProdu
                 ->all()
         );
 
-        return $this->table(
+        $row = $this->table(
             $sheet,
             $row,
-            null,
+            'SAMPLING PACKING DALAM',
             ['Sampling Ke', 'Berat Kemasan', 'Berat / Bag', 'Range Berat', 'Standar Berat'],
             $pb->samplingPackingDalams
                 ->map(fn ($s) => [
@@ -47,5 +47,21 @@ class LaporanPengendalianProdukSausageSheetEnam extends LaporanPengendalianProdu
                 ->values()
                 ->all()
         );
+
+        // Gambar: Stamp Plastik | ED Plastik (dua kotak sama lebar)
+        $gambarItems = [
+            [
+                'title' => 'STAMP PLASTIK',
+                'field' => 'foto_stamp_plastik',
+                'weight' => 1,
+            ],
+            [
+                'title' => 'ED PLASTIK',
+                'field' => 'foto_ed_plastik',
+                'weight' => 1,
+            ],
+        ];
+
+        return $this->stickerRow($sheet, $row, $gambarItems, 8);
     }
 }

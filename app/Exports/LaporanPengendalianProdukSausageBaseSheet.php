@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\ProductionBatch;
 use DateTimeInterface;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -14,6 +15,7 @@ use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 
 abstract class LaporanPengendalianProdukSausageBaseSheet implements
@@ -453,6 +455,200 @@ abstract class LaporanPengendalianProdukSausageBaseSheet implements
 
         return $spans;
     }
+
+    // ------------------------------------------------------------------
+    // Gambar / foto (Kartu Rute, Stamp, ED)
+    // ------------------------------------------------------------------
+
+    // Cek apakah kolom foto di production_batches terisi dan file-nya ada
+    protected function hasSticker(string $field): bool
+    {
+        $path = $this->productionBatch->{$field};
+
+        if (!$path) {
+            return false;
+        }
+
+        return Storage::disk('public')->exists($path);
+    }
+
+    // Beberapa foto sejajar dalam satu baris, masing-masing dengan judul di atasnya.
+    // $items = [['title' => 'KARTU RUTE', 'field' => 'foto_kartu_rute', 'weight' => 3], ...]
+    // Lebar kolom dibagi sesuai 'weight'. Mengembalikan nomor baris berikutnya.
+    // Kalau gambarnya tidak ada, kotaknya dihapus: kotak lain melebar mengisi baris,
+    // dan kalau semua gambar tidak ada, bagian ini tidak ditampilkan sama sekali.
+    protected function stickerRow($sheet, int $row, array $items, int $boxRows): int
+    {
+        $itemsAda = [];
+
+        foreach ($items as $item) {
+            if ($this->hasSticker($item['field'])) {
+                $itemsAda[] = $item;
+            }
+        }
+
+        $items = $itemsAda;
+
+        if (count($items) == 0) {
+            return $row;
+        }
+
+        $totalWeight = 0;
+
+        foreach ($items as $item) {
+            $totalWeight += $item['weight'];
+        }
+
+        $titleRow = $row;
+        $boxStart = $row + 1;
+        $boxEnd = $row + $boxRows;
+
+        $allocated = 0;
+        $colIndex = 0;
+        $lastIndex = count($items) - 1;
+
+        foreach ($items as $i => $item) {
+            if ($i === $lastIndex) {
+                $width = $this->totalCols - $allocated;
+            } else {
+                $width = (int) round(($item['weight'] / $totalWeight) * $this->totalCols);
+            }
+
+            if ($width < 1) {
+                $width = 1;
+            }
+
+            $start = chr(ord('A') + $colIndex);
+            $end = chr(ord('A') + $colIndex + $width - 1);
+
+            // Judul
+            $sheet->mergeCells("{$start}{$titleRow}:{$end}{$titleRow}");
+            $sheet->setCellValueExplicit(
+                "{$start}{$titleRow}",
+                $item['title'],
+                DataType::TYPE_STRING
+            );
+
+            $sheet->getStyle("{$start}{$titleRow}:{$end}{$titleRow}")
+                ->getFont()->setBold(true)->setSize(13);
+
+            $sheet->getStyle("{$start}{$titleRow}:{$end}{$titleRow}")
+                ->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+
+            $sheet->getStyle("{$start}{$titleRow}:{$end}{$titleRow}")
+                ->getBorders()->getAllBorders()
+                ->setBorderStyle(Border::BORDER_THIN);
+
+            $sheet->getStyle("{$start}{$titleRow}:{$end}{$titleRow}")
+                ->getFill()
+                ->setFillType(Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('E5E5E5');
+
+            // Kotak gambar
+            $this->placeStickerImage(
+                $sheet,
+                $boxStart,
+                $boxEnd,
+                $start,
+                $end,
+                $this->productionBatch->{$item['field']}
+            );
+
+            $colIndex += $width;
+            $allocated += $width;
+        }
+
+        $sheet->getRowDimension($titleRow)->setRowHeight(34);
+
+        return $boxEnd + 2;
+    }
+
+    protected function placeStickerImage(
+        $sheet,
+        int $rowStart,
+        int $rowEnd,
+        string $start,
+        string $end,
+        string $imagePath
+    ): void {
+        $rowHeightPt = 26;
+
+        $sheet->mergeCells("{$start}{$rowStart}:{$end}{$rowEnd}");
+
+        $sheet->getStyle("{$start}{$rowStart}:{$end}{$rowEnd}")
+            ->getBorders()->getAllBorders()
+            ->setBorderStyle(Border::BORDER_THIN);
+
+        for ($i = $rowStart; $i <= $rowEnd; $i++) {
+            $sheet->getRowDimension($i)->setRowHeight($rowHeightPt);
+        }
+
+        $fullPath = Storage::disk('public')->path($imagePath);
+        $imageInfo = @getimagesize($fullPath);
+
+        if ($imageInfo === false) {
+            return;
+        }
+
+        $origWidth = $imageInfo[0];
+        $origHeight = $imageInfo[1];
+
+        $padding = 10;
+
+        // 1 pt = 4/3 px
+        $boxHeightPx = (int) round((($rowEnd - $rowStart + 1) * $rowHeightPt) * 4 / 3);
+
+        $availableWidth = $this->columnRangeWidthPx($start, $end) - $padding;
+        $availableHeight = $boxHeightPx - $padding;
+
+        $scale = min(
+            $availableWidth / $origWidth,
+            $availableHeight / $origHeight
+        );
+
+        $drawWidth = (int) round($origWidth * $scale);
+        $drawHeight = (int) round($origHeight * $scale);
+
+        $offsetX = (int) max(4, ($availableWidth - $drawWidth) / 2);
+        $offsetY = (int) max(4, ($availableHeight - $drawHeight) / 2);
+
+        $drawing = new Drawing();
+        $drawing->setName('Gambar');
+        $drawing->setPath($fullPath);
+        $drawing->setResizeProportional(false);
+        $drawing->setCoordinates("{$start}{$rowStart}");
+        $drawing->setOffsetX($offsetX);
+        $drawing->setOffsetY($offsetY);
+        $drawing->setWidth($drawWidth);
+        $drawing->setHeight($drawHeight);
+        $drawing->setWorksheet($sheet);
+    }
+
+    protected function columnRangeWidthPx(string $start, string $end): int
+    {
+        $widths = $this->columnWidths();
+        $total = 0;
+
+        for ($col = ord($start); $col <= ord($end); $col++) {
+            $letter = chr($col);
+
+            $width = 10;
+
+            if (isset($widths[$letter])) {
+                $width = $widths[$letter];
+            }
+
+            $total += (int) round(($width * 7) + 5);
+        }
+
+        return $total;
+    }
+
+    // ------------------------------------------------------------------
+    // Format nilai
+    // ------------------------------------------------------------------
 
     protected function number($value): string
     {

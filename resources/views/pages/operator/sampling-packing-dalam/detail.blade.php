@@ -114,13 +114,13 @@
                                     <tr>
                                         <td class="text-center font-weight-bold">{{ $samplingPackingDalam->sampling_ke }}
                                         </td>
-                                        <td>{{ $samplingPackingDalam->berat_kemasan !== null ? number_format($samplingPackingDalam->berat_kemasan, 2, ',', '.') : '-' }}
+                                        <td>{{ $samplingPackingDalam->berat_kemasan !== null ? $samplingPackingDalam->berat_kemasan : '-' }}
                                         </td>
-                                        <td>{{ $samplingPackingDalam->berat_per_bag !== null ? number_format($samplingPackingDalam->berat_per_bag, 2, ',', '.') : '-' }}
+                                        <td>{{ $samplingPackingDalam->berat_per_bag !== null ? $samplingPackingDalam->berat_per_bag : '-' }}
                                         </td>
-                                        <td>{{ $samplingPackingDalam->range_berat !== null ? number_format($samplingPackingDalam->range_berat, 2, ',', '.') : '-' }}
+                                        <td>{{ $samplingPackingDalam->range_berat !== null ? $samplingPackingDalam->range_berat : '-' }}
                                         </td>
-                                        <td>{{ $samplingPackingDalam->standar_berat !== null ? number_format($samplingPackingDalam->standar_berat, 2, ',', '.') : '-' }}
+                                        <td>{{ $samplingPackingDalam->standar_berat !== null ? $samplingPackingDalam->standar_berat : '-' }}
                                         </td>
                                         <td class="text-center">
                                             <div class="action-buttons">

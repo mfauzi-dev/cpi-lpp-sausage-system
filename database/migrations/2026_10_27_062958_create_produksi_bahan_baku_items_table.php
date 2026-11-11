@@ -18,7 +18,6 @@ return new class extends Migration
             $table->foreignId('product_formula_id')->nullable()->constrained('product_formulas')->nullOnDelete();
             $table->string('kode_batch')->nullable();
             $table->date('best_before')->nullable();
-            $table->decimal('total_kg', 12, 2);
             $table->decimal('suhu_rm', 5, 1)->nullable();
             $table->timestamps();
         });

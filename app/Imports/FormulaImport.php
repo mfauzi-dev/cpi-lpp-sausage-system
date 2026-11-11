@@ -103,9 +103,8 @@ class FormulaImport implements ToCollection, WithMultipleSheets
                         'bahan_baku_id' => $bahanBaku->id,
                         'multiplier' => $multiplier,
                     ],
-                    ['qty' => $this->parseNumber($raw)]
+                    ['total_kg' => $this->parseNumber($raw)]
                 );
-
                 $this->imported++;
             }
 

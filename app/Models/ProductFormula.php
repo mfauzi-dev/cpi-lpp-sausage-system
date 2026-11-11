@@ -9,7 +9,7 @@ class ProductFormula extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['product_id', 'bahan_baku_id', 'multiplier', 'qty'];
+    protected $fillable = ['product_id', 'bahan_baku_id', 'multiplier', 'total_kg'];
 
     public function product()
     {

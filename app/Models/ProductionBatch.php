@@ -17,6 +17,11 @@ class ProductionBatch extends Model
         'yield_meat',
         'total_meat',
         'shift',
+        'foto_kartu_rute',
+        'foto_stamp_plastik',
+        'foto_stamp_box',
+        'foto_ed_plastik',
+        'foto_ed_carton_box',
     ];
 
     protected $casts = [
@@ -48,7 +53,7 @@ class ProductionBatch extends Model
 
     public function standarParameterProduks()
     {
-        return $this->hasMany(StandarParameterProduk::class);
+        return $this->hasMany(StandarParameterProduk::class, 'product_id', 'product_id');
     }
 
     public function rejects()

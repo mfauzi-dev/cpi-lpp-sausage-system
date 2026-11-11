@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('standar_parameter_produks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('production_batch_id')->constrained('production_batches')->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
             $table->unsignedTinyInteger('sampling_ke');
             $table->decimal('diameter', 8, 2)->nullable();
             $table->decimal('panjang', 8, 2)->nullable();

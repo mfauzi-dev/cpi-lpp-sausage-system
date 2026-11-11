@@ -26,7 +26,7 @@ class LaporanPengendalianProdukSausageSheetEmpat extends LaporanPengendalianProd
             $row = $this->table(
                 $sheet,
                 $row,
-                null,
+                'PARAMETER PEMASAKAN',
                 ['Parameter Pemasakan', 'Suhu', 'RH', 'Waktu'],
                 []
             );
@@ -54,7 +54,7 @@ class LaporanPengendalianProdukSausageSheetEmpat extends LaporanPengendalianProd
             $row = $this->table(
                 $sheet,
                 $row,
-                null,
+                'PARAMETER PEMASAKAN',
                 ['Parameter Pemasakan - ' . $this->val($p->penggunaan_mesin), 'Suhu', 'RH', 'Waktu'],
                 $rows
             );
@@ -63,7 +63,7 @@ class LaporanPengendalianProdukSausageSheetEmpat extends LaporanPengendalianProd
         $row = $this->table(
             $sheet,
             $row,
-            null,
+            'MONITORING PEMASAKAN',
             [
                 'Waktu Mulai',
                 'Waktu Selesai',
@@ -98,7 +98,7 @@ class LaporanPengendalianProdukSausageSheetEmpat extends LaporanPengendalianProd
         return $this->table(
             $sheet,
             $row,
-            null,
+            'MONITORING LINE BASO',
             [
                 'Line Baso',
                 'Suhu Air',

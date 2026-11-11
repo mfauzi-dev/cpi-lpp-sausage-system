@@ -17,13 +17,22 @@ class LaporanPengendalianProdukSausageSheetSatu extends LaporanPengendalianProdu
             return $this->table(
                 $sheet,
                 $row,
-                null,
+                'PRODUKSI BAHAN BAKU',
                 ['Bahan Baku', 'Kode Batch', 'Best Before', 'Total Kg', 'Suhu RM', 'Formula'],
                 []
             );
         }
 
+        $jumlahRecord = $records->count();
+        $no = 1;
+
         foreach ($records as $record) {
+            $judul = 'PRODUKSI BAHAN BAKU';
+
+            if ($jumlahRecord > 1) {
+                $judul = 'PRODUKSI BAHAN BAKU ' . $no;
+            }
+
             $rows = $record->items
                 ->map(fn ($item) => [
                     $this->val($item->bahanBaku->name ?? null),
@@ -40,11 +49,13 @@ class LaporanPengendalianProdukSausageSheetSatu extends LaporanPengendalianProdu
             $row = $this->table(
                 $sheet,
                 $row,
-                null,
+                $judul,
                 ['Bahan Baku', 'Kode Batch', 'Best Before', 'Total Kg', 'Suhu RM', 'Formula'],
                 $rows
             );
 
+            // Tabel Total / Penggunaan / Sisa menempel di bawah tabel bahan baku,
+            // jadi tidak diberi judul sendiri.
             $row = $this->table(
                 $sheet,
                 $row - 1,
@@ -56,6 +67,8 @@ class LaporanPengendalianProdukSausageSheetSatu extends LaporanPengendalianProdu
                     $this->number($record->sisa),
                 ]]
             );
+
+            $no++;
         }
 
         return $row;

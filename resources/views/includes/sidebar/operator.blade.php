@@ -40,6 +40,14 @@
                 </a>
             </li>
 
+
+            <li class="{{ Request::routeIs('operator.standar-parameter-produk.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('operator.standar-parameter-produk.index') }}">
+                    <i class="bi bi-clipboard-check"></i>
+                    <span>Standar Parameter Produk</span>
+                </a>
+            </li>
+
             <li class="menu-header">Operational Meat Preparation</li>
 
             <li class="{{ Request::routeIs('operator.production-batch.*') ? 'active' : '' }}">
@@ -67,13 +75,6 @@
                 <a class="nav-link" href="{{ route('operator.parameter-produk.index') }}">
                     <i class="bi bi-clipboard2-pulse"></i>
                     <span>Parameter Produk</span>
-                </a>
-            </li>
-
-            <li class="{{ Request::routeIs('operator.standar-parameter-produk.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('operator.standar-parameter-produk.index') }}">
-                    <i class="bi bi-clipboard-check"></i>
-                    <span>Standar Parameter Produk</span>
                 </a>
             </li>
 

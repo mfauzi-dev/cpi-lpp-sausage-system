@@ -155,9 +155,9 @@
                                         <th width="70" class="text-center">No</th>
                                         <th>Bahan Baku</th>
                                         <th>Formula</th>
+                                        <th>Total (Kg)</th>
                                         <th>Kode Batch</th>
                                         <th>Best Before</th>
-                                        <th>Total (Kg)</th>
                                         <th>Suhu RM (°C)</th>
                                         <th width="100" class="text-center">Aksi</th>
                                     </tr>
@@ -250,11 +250,13 @@
                 'id' => $f->id,
                 'bahan_baku_id' => $f->bahan_baku_id,
                 'multiplier' => $f->multiplier,
-                'qty' => $f->qty,
+                'total_kg' => $f->total_kg,
             ];
         })
         ->values();
 
+    // total_kg sudah tidak lagi kolom di item (sekarang murni master
+    // data di ProductFormula), jadi tidak diikutkan di sini.
     $currentItemsJs = $produksi->items
         ->map(function ($item) {
             return [
@@ -262,7 +264,6 @@
                 'product_formula_id' => $item->product_formula_id,
                 'kode_batch' => $item->kode_batch,
                 'best_before' => optional($item->best_before)->format('Y-m-d'),
-                'total_kg' => $item->total_kg,
                 'suhu_rm' => $item->suhu_rm,
             ];
         })
@@ -346,7 +347,6 @@
                 $('#bahan-table-body').empty();
 
                 let index = 0;
-                const usedFormulaIds = [];
 
                 formulas.forEach(function(f) {
 
@@ -361,17 +361,16 @@
                         product_formula_id: f.id,
                         kode_batch: existing.kode_batch,
                         best_before: existing.best_before,
-                        total_kg: existing.total_kg,
                         suhu_rm: existing.suhu_rm
                     }, index);
 
-                    usedFormulaIds.push(String(f.id));
                     index++;
 
                 });
 
                 // item tersimpan yang bahan bakunya tidak termasuk formula manapun di produk ini
-                // (mis. ditambahkan manual tanpa formula di edit versi lama) tetap ditampilkan
+                // (mis. ditambahkan manual tanpa formula di edit versi lama) tetap ditampilkan.
+                // Total (Kg) baris ini otomatis 0 karena tidak ada ProductFormula yang menyertainya.
                 leftoverItems.forEach(function(item) {
                     appendRow(item, index);
                     index++;
@@ -384,7 +383,7 @@
                 renumberRows();
             }
 
-            // ===== Cari nama bahan baku & label formula =====
+            // ===== Cari nama bahan baku, label formula & total kg master =====
             function getBahanName(bahanId) {
 
                 let name = '-';
@@ -404,16 +403,33 @@
 
                 formulas.forEach(function(f) {
                     if (String(f.id) === String(formulaId)) {
-                        const qty = String(f.qty).replace('.', ',');
-                        label = 'Formula ' + f.multiplier + ' (' + qty + ')';
+                        const total = String(f.total_kg).replace('.', ',');
+                        label = 'Formula ' + f.multiplier + ' (' + total + ' Kg)';
                     }
                 });
 
                 return label;
             }
 
+            // total_kg sekarang murni master data di ProductFormula; item
+            // tanpa product_formula_id yang cocok otomatis dapat 0.
+            function getFormulaTotalKg(formulaId) {
+
+                let total = 0;
+
+                formulas.forEach(function(f) {
+                    if (String(f.id) === String(formulaId)) {
+                        total = parseFloat(f.total_kg) || 0;
+                    }
+                });
+
+                return total;
+            }
+
             // ===== Baris =====
             function appendRow(data = {}, index) {
+
+                const totalKg = getFormulaTotalKg(data.product_formula_id);
 
                 const html = `
                     <tr data-row-index="${index}">
@@ -432,6 +448,10 @@
                                 value="${data.product_formula_id ?? ''}">
                         </td>
 
+                        <td class="align-middle text-right total-kg-cell" data-total-kg="${totalKg}">
+                            ${formatNumber(totalKg)}
+                        </td>
+
                         <td>
                             <input type="text" name="items[${index}][kode_batch]"
                                 class="form-control" placeholder="Kode batch"
@@ -442,13 +462,6 @@
                             <input type="date" name="items[${index}][best_before]"
                                 class="form-control"
                                 value="${data.best_before ?? ''}">
-                        </td>
-
-                        <td>
-                            <input type="number" step="0.001" min="0"
-                                name="items[${index}][total_kg]"
-                                class="form-control total-kg" placeholder="Kg"
-                                value="${data.total_kg ?? ''}">
                         </td>
 
                         <td>
@@ -473,7 +486,7 @@
                 renumberRows();
             }
 
-            $(document).on('input', '.total-kg, #penggunaan', calculate);
+            $(document).on('input', '#penggunaan', calculate);
 
             $(document).on('click', '.removeRow', function() {
 
@@ -510,8 +523,8 @@
 
                 let total = 0;
 
-                $('.total-kg').each(function() {
-                    total += parseFloat($(this).val()) || 0;
+                $('.total-kg-cell').each(function() {
+                    total += parseFloat($(this).data('total-kg')) || 0;
                 });
 
                 const penggunaan = parseFloat($('#penggunaan').val()) || 0;
@@ -584,8 +597,8 @@
                 }
 
                 let total = 0;
-                $('.total-kg').each(function() {
-                    total += parseFloat($(this).val()) || 0;
+                $('.total-kg-cell').each(function() {
+                    total += parseFloat($(this).data('total-kg')) || 0;
                 });
 
                 const penggunaan = parseFloat($('#penggunaan').val()) || 0;

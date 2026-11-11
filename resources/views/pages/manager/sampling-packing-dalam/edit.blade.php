@@ -212,7 +212,7 @@
                             const kodeBatch = batch.kode_batch ?? '-';
                             const shift = batch.shift ?? '-';
                             const option = new Option(kodeBatch + ' - ' + productName, batch
-                            .id);
+                                .id);
 
                             $(option).attr('data-product', productName);
                             $(option).attr('data-kode-batch', kodeBatch);

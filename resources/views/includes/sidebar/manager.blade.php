@@ -63,13 +63,6 @@
                 </a>
             </li>
 
-            <li class="{{ Request::routeIs('manager.standar-parameter-produk.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('manager.standar-parameter-produk.index') }}">
-                    <i class="bi bi-clipboard-check"></i>
-                    <span>Standar Parameter Produk</span>
-                </a>
-            </li>
-
             <li class="{{ Request::routeIs('manager.suhu-area.*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('manager.suhu-area.index') }}">
                     <i class="bi bi-thermometer-half"></i>

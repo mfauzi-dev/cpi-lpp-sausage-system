@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('bahan_baku_id')->constrained()->cascadeOnDelete();
             $table->unsignedTinyInteger('multiplier');
-            $table->decimal('qty', 12, 3); 
+            $table->decimal('total_kg', 12, 3); 
             $table->timestamps();
         });
     }

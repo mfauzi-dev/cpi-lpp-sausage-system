@@ -13,6 +13,10 @@ class LaporanPengendalianProdukSausageSheetTiga extends LaporanPengendalianProdu
     {
         $pb = $this->productionBatch;
 
+        // Judul untuk tabel vertikal (Reject Cooking)
+        $this->sectionTitle($sheet, $row, 'REJECT COOKING');
+        $row++;
+
         $row = $this->verticalTable(
             $sheet,
             $row,
@@ -53,7 +57,7 @@ class LaporanPengendalianProdukSausageSheetTiga extends LaporanPengendalianProdu
         return $this->table(
             $sheet,
             $row,
-            null,
+            'SUHU AREA',
             ['Suhu Area', 'Standar', 'Aktual'],
             $suhuRows
         );

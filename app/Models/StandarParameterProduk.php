@@ -10,7 +10,7 @@ class StandarParameterProduk extends Model
     use HasFactory;
 
     protected $fillable = [
-        'production_batch_id',
+        'product_id',
         'sampling_ke',
         'diameter',
         'panjang',
@@ -19,8 +19,8 @@ class StandarParameterProduk extends Model
         'berat_adonan',
     ];
 
-    public function productionBatch()
+    public function product()
     {
-        return $this->belongsTo(ProductionBatch::class);
+        return $this->belongsTo(Product::class);
     }
 }

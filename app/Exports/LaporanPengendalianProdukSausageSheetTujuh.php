@@ -13,6 +13,10 @@ class LaporanPengendalianProdukSausageSheetTujuh extends LaporanPengendalianProd
     {
         $pb = $this->productionBatch;
 
+        // Judul untuk tabel vertikal (Reject Packing)
+        $this->sectionTitle($sheet, $row, 'REJECT PACKING');
+        $row++;
+
         $row = $this->verticalTable(
             $sheet,
             $row,
@@ -33,7 +37,7 @@ class LaporanPengendalianProdukSausageSheetTujuh extends LaporanPengendalianProd
         return $this->table(
             $sheet,
             $row,
-            null,
+            'METAL DETECTOR',
             [
                 'Jenis Pemeriksaan',
                 'No. Mesin',

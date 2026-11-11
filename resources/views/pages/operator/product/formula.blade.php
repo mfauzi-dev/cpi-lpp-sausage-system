@@ -89,11 +89,11 @@
                         </div>
 
                         <div class="col-md-3 mb-3">
-                            <label class="filter-label">Qty</label>
-                            <input type="number" step="0.0001" name="qty"
-                                class="form-control @error('qty') is-invalid @enderror" placeholder="0.00"
-                                value="{{ old('qty') }}">
-                            @error('qty')
+                            <label class="filter-label">Total Kg</label>
+                            <input type="number" step="0.0001" name="total_kg"
+                                class="form-control @error('total_kg') is-invalid @enderror" placeholder="0.00"
+                                value="{{ old('total_kg') }}">
+                            @error('total_kg')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -106,6 +106,22 @@
                     </div>
                 </form>
             </div>
+        </div>
+
+        {{-- Form ini TIDAK membungkus tabel. Checkbox di bawah "nempel" ke form ini
+             lewat atribut form="bulkDestroyForm", jadi tetap ikut ter-submit meski
+             secara HTML berada di luar tag <form>. Ini supaya form delete per-baris
+             (di dalam tabel) tidak perlu nested dengan form bulk delete. --}}
+        <form id="bulkDestroyForm" action="{{ route('operator.product.formula.bulk-destroy') }}" method="POST"
+            onsubmit="return confirm('Yakin ingin menghapus semua baris formula yang dicentang?');">
+            @csrf
+        </form>
+
+        <div class="mb-3 d-flex align-items-center" style="gap: .5rem;">
+            <button type="submit" form="bulkDestroyForm" class="btn btn-outline-danger" id="bulkDestroyBtn" disabled>
+                <i class="fas fa-trash mr-1"></i>
+                Hapus Terpilih (<span id="bulkDestroyCount">0</span>)
+            </button>
         </div>
 
         @forelse ($formulas as $multiplier => $rows)
@@ -122,17 +138,24 @@
                         <table class="table table-bordered table-wide">
                             <thead>
                                 <tr>
+                                    <th width="40" class="text-center">
+                                        <input type="checkbox" class="select-all-in-table">
+                                    </th>
                                     <th>Bahan Baku</th>
-                                    <th width="150" class="text-right">Qty</th>
+                                    <th width="150" class="text-right">Total Kg</th>
                                     <th width="120" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($rows as $row)
                                     <tr>
+                                        <td class="text-center">
+                                            <input type="checkbox" name="ids[]" value="{{ $row->id }}"
+                                                form="bulkDestroyForm" class="row-checkbox">
+                                        </td>
                                         <td>{{ $row->bahanBaku->name }}</td>
                                         <td class="text-right">
-                                            {{ number_format($row->qty, 3, ',', '.') }}
+                                            {{ number_format($row->total_kg, 3, ',', '.') }}
                                         </td>
                                         <td class="text-center">
                                             <div class="action-buttons">
@@ -177,6 +200,25 @@
                 placeholder: 'Pilih Produk',
                 width: '100%'
             });
+
+            const $bulkBtn = $('#bulkDestroyBtn');
+            const $bulkCount = $('#bulkDestroyCount');
+
+            function updateBulkState() {
+                const checked = $('.row-checkbox:checked').length;
+                $bulkCount.text(checked);
+                $bulkBtn.prop('disabled', checked === 0);
+            }
+
+            $(document).on('change', '.row-checkbox', updateBulkState);
+
+            $(document).on('change', '.select-all-in-table', function() {
+                const $table = $(this).closest('table');
+                $table.find('.row-checkbox').prop('checked', $(this).is(':checked'));
+                updateBulkState();
+            });
+
+            updateBulkState();
         });
     </script>
 @endpush

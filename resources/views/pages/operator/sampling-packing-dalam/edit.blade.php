@@ -104,7 +104,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="berat_kemasan">Berat Kemasan (gr)</label>
-                                <input type="number" step="0.01" min="0" name="berat_kemasan" id="berat_kemasan"
+                                <input type="text"name="berat_kemasan" id="berat_kemasan"
                                     class="form-control @error('berat_kemasan') is-invalid @enderror"
                                     value="{{ old('berat_kemasan', $samplingPackingDalam->berat_kemasan) }}"
                                     placeholder="Masukkan berat kemasan">
@@ -114,7 +114,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="berat_per_bag">Berat Per Bag (gr)</label>
-                                <input type="number" step="0.01" min="0" name="berat_per_bag" id="berat_per_bag"
+                                <input type="text"name="berat_per_bag" id="berat_per_bag"
                                     class="form-control @error('berat_per_bag') is-invalid @enderror"
                                     value="{{ old('berat_per_bag', $samplingPackingDalam->berat_per_bag) }}"
                                     placeholder="Masukkan berat per bag">
@@ -124,7 +124,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="range_berat">Range Berat (gr)</label>
-                                <input type="number" step="0.01" min="0" name="range_berat" id="range_berat"
+                                <input type="text"name="range_berat" id="range_berat"
                                     class="form-control @error('range_berat') is-invalid @enderror"
                                     value="{{ old('range_berat', $samplingPackingDalam->range_berat) }}"
                                     placeholder="Masukkan range berat">
@@ -134,8 +134,8 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="standar_berat">Standar Berat (gr)</label>
-                                <input type="number" step="0.01" min="0" name="standar_berat"
-                                    id="standar_berat" class="form-control @error('standar_berat') is-invalid @enderror"
+                                <input type="text"name="standar_berat" id="standar_berat"
+                                    class="form-control @error('standar_berat') is-invalid @enderror"
                                     value="{{ old('standar_berat', $samplingPackingDalam->standar_berat) }}"
                                     placeholder="Masukkan standar berat">
                                 @error('standar_berat')
@@ -212,7 +212,7 @@
                             const kodeBatch = batch.kode_batch ?? '-';
                             const shift = batch.shift ?? '-';
                             const option = new Option(kodeBatch + ' - ' + productName, batch
-                            .id);
+                                .id);
 
                             $(option).attr('data-product', productName);
                             $(option).attr('data-kode-batch', kodeBatch);

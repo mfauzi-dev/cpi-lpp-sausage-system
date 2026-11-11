@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('production_batch_id')->constrained('production_batches')->cascadeOnDelete();
             $table->unsignedTinyInteger('sampling_ke');
-            $table->decimal('berat_kemasan', 8, 2)->nullable();
-            $table->decimal('berat_per_bag', 8, 2)->nullable();
-            $table->decimal('range_berat', 8, 2)->nullable();
-            $table->decimal('standar_berat', 8, 2)->nullable();
+            $table->string('berat_kemasan')->nullable();
+            $table->string('berat_per_bag')->nullable();
+            $table->string('range_berat')->nullable();
+            $table->string('standar_berat')->nullable();
             $table->timestamps();
         });
     }

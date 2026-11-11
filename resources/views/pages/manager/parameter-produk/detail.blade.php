@@ -112,58 +112,159 @@
                         <table class="table table-bordered table-wide mb-0">
                             <thead>
                                 <tr>
-                                    <th width="60" class="text-center">Sampling Ke</th>
-                                    <th>Berat / 3 Pcs (gr)</th>
-                                    <th>Diameter (mm)</th>
-                                    <th>Panjang (cm)</th>
-                                    <th>Berat per Pcs (gr)</th>
-                                    <th>Berat Kulit (gr)</th>
-                                    <th>Berat Adonan (gr)</th>
-                                    <th>Berat per 3 Pcs Akhir (gr)</th>
+                                    <th rowspan="2" width="60" class="text-center align-middle">Sampling Ke</th>
+                                    <th rowspan="2" class="align-middle">Berat / 3 Pcs (gr)</th>
+                                    <th colspan="2" class="text-center">Diameter (mm)</th>
+                                    <th colspan="2" class="text-center">Panjang (cm)</th>
+                                    <th colspan="2" class="text-center">Berat per Pcs (gr)</th>
+                                    <th colspan="2" class="text-center">Berat Kulit (gr)</th>
+                                    <th colspan="2" class="text-center">Berat Adonan (gr)</th>
+                                    <th rowspan="2" class="align-middle">Berat per 3 Pcs Akhir (gr)</th>
+                                </tr>
+                                <tr>
+                                    <th class="text-center">Standar</th>
+                                    <th class="text-center">Aktual</th>
+                                    <th class="text-center">Standar</th>
+                                    <th class="text-center">Aktual</th>
+                                    <th class="text-center">Standar</th>
+                                    <th class="text-center">Aktual</th>
+                                    <th class="text-center">Standar</th>
+                                    <th class="text-center">Aktual</th>
+                                    <th class="text-center">Standar</th>
+                                    <th class="text-center">Aktual</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($parameterProduks as $parameterProduk)
+                                @for ($i = 1; $i <= 5; $i++)
+                                    @php
+                                        $parameterProduk = null;
+                                        if (isset($parameterBySampling[$i])) {
+                                            $parameterProduk = $parameterBySampling[$i];
+                                        }
+
+                                        $standar = null;
+                                        if (isset($standarBySampling[$i])) {
+                                            $standar = $standarBySampling[$i];
+                                        }
+
+                                        $standarDiameter = '-';
+                                        $standarPanjang = '-';
+                                        $standarBeratPerPcs = '-';
+                                        $standarBeratKulit = '-';
+                                        $standarBeratAdonan = '-';
+
+                                        if ($standar) {
+                                            if ($standar->diameter !== null) {
+                                                $standarDiameter = number_format($standar->diameter, 2, ',', '.');
+                                            }
+                                            if ($standar->panjang !== null) {
+                                                $standarPanjang = number_format($standar->panjang, 2, ',', '.');
+                                            }
+                                            if ($standar->berat_per_pcs !== null) {
+                                                $standarBeratPerPcs = number_format(
+                                                    $standar->berat_per_pcs,
+                                                    2,
+                                                    ',',
+                                                    '.',
+                                                );
+                                            }
+                                            if ($standar->berat_kulit !== null) {
+                                                $standarBeratKulit = number_format($standar->berat_kulit, 2, ',', '.');
+                                            }
+                                            if ($standar->berat_adonan !== null) {
+                                                $standarBeratAdonan = number_format(
+                                                    $standar->berat_adonan,
+                                                    2,
+                                                    ',',
+                                                    '.',
+                                                );
+                                            }
+                                        }
+
+                                        $aktualBeratPer3Pcs = '-';
+                                        $aktualDiameter = '-';
+                                        $aktualPanjang = '-';
+                                        $aktualBeratPerPcs = '-';
+                                        $aktualBeratKulit = '-';
+                                        $aktualBeratAdonan = '-';
+                                        $aktualBeratPer3PcsAkhir = '-';
+
+                                        if ($parameterProduk) {
+                                            if ($parameterProduk->berat_per_3pcs !== null) {
+                                                $aktualBeratPer3Pcs = number_format(
+                                                    $parameterProduk->berat_per_3pcs,
+                                                    2,
+                                                    ',',
+                                                    '.',
+                                                );
+                                            }
+                                            if ($parameterProduk->diameter !== null) {
+                                                $aktualDiameter = number_format(
+                                                    $parameterProduk->diameter,
+                                                    2,
+                                                    ',',
+                                                    '.',
+                                                );
+                                            }
+                                            if ($parameterProduk->panjang !== null) {
+                                                $aktualPanjang = number_format($parameterProduk->panjang, 2, ',', '.');
+                                            }
+                                            if ($parameterProduk->berat_per_pcs !== null) {
+                                                $aktualBeratPerPcs = number_format(
+                                                    $parameterProduk->berat_per_pcs,
+                                                    2,
+                                                    ',',
+                                                    '.',
+                                                );
+                                            }
+                                            if ($parameterProduk->berat_kulit !== null) {
+                                                $aktualBeratKulit = number_format(
+                                                    $parameterProduk->berat_kulit,
+                                                    2,
+                                                    ',',
+                                                    '.',
+                                                );
+                                            }
+                                            if ($parameterProduk->berat_adonan !== null) {
+                                                $aktualBeratAdonan = number_format(
+                                                    $parameterProduk->berat_adonan,
+                                                    2,
+                                                    ',',
+                                                    '.',
+                                                );
+                                            }
+                                            if ($parameterProduk->berat_per_3pcs_akhir !== null) {
+                                                $aktualBeratPer3PcsAkhir = number_format(
+                                                    $parameterProduk->berat_per_3pcs_akhir,
+                                                    2,
+                                                    ',',
+                                                    '.',
+                                                );
+                                            }
+                                        }
+                                    @endphp
                                     <tr>
-                                        <td class="text-center font-weight-bold">
-                                            {{ $parameterProduk->sampling_ke }}
-                                        </td>
-                                        <td>
-                                            {{ $parameterProduk->berat_per_3pcs !== null
-                                                ? number_format($parameterProduk->berat_per_3pcs, 2, ',', '.')
-                                                : '-' }}
-                                        </td>
-                                        <td>
-                                            {{ $parameterProduk->diameter !== null ? number_format($parameterProduk->diameter, 2, ',', '.') : '-' }}
-                                        </td>
-                                        <td>
-                                            {{ $parameterProduk->panjang !== null ? number_format($parameterProduk->panjang, 2, ',', '.') : '-' }}
-                                        </td>
-                                        <td>
-                                            {{ $parameterProduk->berat_per_pcs !== null ? number_format($parameterProduk->berat_per_pcs, 2, ',', '.') : '-' }}
-                                        </td>
-                                        <td>
-                                            {{ $parameterProduk->berat_kulit !== null ? number_format($parameterProduk->berat_kulit, 2, ',', '.') : '-' }}
-                                        </td>
-                                        <td>
-                                            {{ $parameterProduk->berat_adonan !== null ? number_format($parameterProduk->berat_adonan, 2, ',', '.') : '-' }}
-                                        </td>
-                                        <td>
-                                            {{ $parameterProduk->berat_per_3pcs_akhir !== null
-                                                ? number_format($parameterProduk->berat_per_3pcs_akhir, 2, ',', '.')
-                                                : '-' }}
-                                        </td>
+                                        <td class="text-center font-weight-bold">{{ $i }}</td>
+                                        <td>{{ $aktualBeratPer3Pcs }}</td>
+
+                                        <td class="text-center text-muted">{{ $standarDiameter }}</td>
+                                        <td class="text-center font-weight-bold">{{ $aktualDiameter }}</td>
+
+                                        <td class="text-center text-muted">{{ $standarPanjang }}</td>
+                                        <td class="text-center font-weight-bold">{{ $aktualPanjang }}</td>
+
+                                        <td class="text-center text-muted">{{ $standarBeratPerPcs }}</td>
+                                        <td class="text-center font-weight-bold">{{ $aktualBeratPerPcs }}</td>
+
+                                        <td class="text-center text-muted">{{ $standarBeratKulit }}</td>
+                                        <td class="text-center font-weight-bold">{{ $aktualBeratKulit }}</td>
+
+                                        <td class="text-center text-muted">{{ $standarBeratAdonan }}</td>
+                                        <td class="text-center font-weight-bold">{{ $aktualBeratAdonan }}</td>
+
+                                        <td>{{ $aktualBeratPer3PcsAkhir }}</td>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="8">
-                                            <div class="empty-state">
-                                                <i class="fas fa-vials d-block"></i>
-                                                <div>Belum ada data sampling.</div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforelse
+                                @endfor
                             </tbody>
                         </table>
                     </div>
@@ -175,7 +276,7 @@
                     <div class="d-flex justify-content-between align-items-center flex-wrap">
                         <div class="section-info mb-2 mb-md-0">
                             <i class="fas fa-info-circle"></i>
-                            Pastikan data sampling sudah sesuai sebelum keluar halaman ini.
+                            Data ini hanya untuk dilihat.
                         </div>
                         <div class="action-buttons">
                             <a href="{{ route('manager.parameter-produk.index') }}" class="btn btn-ghost">

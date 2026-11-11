@@ -113,19 +113,16 @@
                                                     min="1" max="255" readonly>
                                             </td>
                                             <td>
-                                                <input type="number" name="sampling[{{ $i }}][berat_per_bok]"
-                                                    class="form-control" step="0.01" min="0"
-                                                    value="{{ old("sampling.$i.berat_per_bok") }}">
+                                                <input type="text" name="sampling[{{ $i }}][berat_per_bok]"
+                                                    class="form-control" value="{{ old("sampling.$i.berat_per_bok") }}">
                                             </td>
                                             <td>
-                                                <input type="number" name="sampling[{{ $i }}][range_berat]"
-                                                    class="form-control" step="0.01" min="0"
-                                                    value="{{ old("sampling.$i.range_berat") }}">
+                                                <input type="text" name="sampling[{{ $i }}][range_berat]"
+                                                    class="form-control" value="{{ old("sampling.$i.range_berat") }}">
                                             </td>
                                             <td>
-                                                <input type="number" name="sampling[{{ $i }}][standar_berat]"
-                                                    class="form-control" step="0.01" min="0"
-                                                    value="{{ old("sampling.$i.standar_berat") }}">
+                                                <input type="text" name="sampling[{{ $i }}][standar_berat]"
+                                                    class="form-control" value="{{ old("sampling.$i.standar_berat") }}">
                                             </td>
                                         </tr>
                                     @endfor

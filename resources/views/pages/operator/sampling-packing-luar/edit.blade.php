@@ -104,7 +104,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="berat_per_bok">Berat Per Bok (gr)</label>
-                                <input type="number" step="0.01" min="0" name="berat_per_bok" id="berat_per_bok"
+                                <input type="text" name="berat_per_bok" id="berat_per_bok"
                                     class="form-control @error('berat_per_bok') is-invalid @enderror"
                                     value="{{ old('berat_per_bok', $samplingPackingLuar->berat_per_bok) }}"
                                     placeholder="Masukkan berat per bok">
@@ -114,7 +114,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="range_berat">Range Berat (gr)</label>
-                                <input type="number" step="0.01" min="0" name="range_berat" id="range_berat"
+                                <input type="text" name="range_berat" id="range_berat"
                                     class="form-control @error('range_berat') is-invalid @enderror"
                                     value="{{ old('range_berat', $samplingPackingLuar->range_berat) }}"
                                     placeholder="Masukkan range berat">
@@ -124,7 +124,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="standar_berat">Standar Berat (gr)</label>
-                                <input type="number" step="0.01" min="0" name="standar_berat" id="standar_berat"
+                                <input type="text" name="standar_berat" id="standar_berat"
                                     class="form-control @error('standar_berat') is-invalid @enderror"
                                     value="{{ old('standar_berat', $samplingPackingLuar->standar_berat) }}"
                                     placeholder="Masukkan standar berat">

@@ -55,10 +55,10 @@ class SamplingPackingDalamController extends Controller
             'production_batch_id' => ['required', 'exists:production_batches,id'],
             'sampling' => ['nullable', 'array'],
             'sampling.*.sampling_ke' => ['required', 'integer', 'min:1'],
-            'sampling.*.berat_kemasan' => ['nullable', 'numeric', 'min:0'],
-            'sampling.*.berat_per_bag' => ['nullable', 'numeric', 'min:0'],
-            'sampling.*.range_berat' => ['nullable', 'numeric', 'min:0'],
-            'sampling.*.standar_berat' => ['nullable', 'numeric', 'min:0'],
+            'sampling.*.berat_kemasan' => ['nullable'],
+            'sampling.*.berat_per_bag' => ['nullable'],
+            'sampling.*.range_berat' => ['nullable'],
+            'sampling.*.standar_berat' => ['nullable'],
         ]);
 
         DB::beginTransaction();
@@ -138,10 +138,10 @@ class SamplingPackingDalamController extends Controller
         $request->validate([
             'production_batch_id' => ['required', 'exists:production_batches,id'],
             'sampling_ke' => ['required', 'integer', 'min:1'],
-            'berat_kemasan' => ['nullable', 'numeric', 'min:0'],
-            'berat_per_bag' => ['nullable', 'numeric', 'min:0'],
-            'range_berat' => ['nullable', 'numeric', 'min:0'],
-            'standar_berat' => ['nullable', 'numeric', 'min:0'],
+            'berat_kemasan' => ['nullable'],
+            'berat_per_bag' => ['nullable'],
+            'range_berat' => ['nullable'],
+            'standar_berat' => ['nullable'],
         ]);
 
         $samplingPackingDalam = SamplingPackingDalam::findOrFail($id);

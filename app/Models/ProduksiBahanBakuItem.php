@@ -15,13 +15,11 @@ class ProduksiBahanBakuItem extends Model
         'product_formula_id',
         'kode_batch',
         'best_before',
-        'total_kg',
         'suhu_rm',
     ];
 
     protected $casts = [
         'best_before' => 'date',
-        'total_kg' => 'decimal:3',
         'suhu_rm' => 'decimal:1',
     ];
 

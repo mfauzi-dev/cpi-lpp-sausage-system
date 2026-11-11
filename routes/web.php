@@ -66,6 +66,7 @@ Route::prefix('operator')->middleware(['auth', 'role:Operator'])->group(function
 
         Route::get('/formula/import', [ProductFormulaController::class, 'importPage'])->name('operator.product.formula.import');
         Route::post('/formula/import', [ProductFormulaController::class, 'upload'])->name('operator.product.formula.upload');
+        Route::post('/formula/bulk-destroy', [ProductFormulaController::class, 'bulkDestroy'])->name('operator.product.formula.bulk-destroy');
 
         Route::get('/{product}/formula', [ProductFormulaController::class, 'index'])->name('operator.product.formula.index');
         Route::post('/{product}/formula/store', [ProductFormulaController::class, 'store'])->name('operator.product.formula.store');
@@ -113,8 +114,8 @@ Route::prefix('operator')->middleware(['auth', 'role:Operator'])->group(function
         Route::get('/create', [ParameterProdukController::class, 'create'])->name('operator.parameter-produk.create');
         Route::post('/store', [ParameterProdukController::class, 'store'])->name('operator.parameter-produk.store');
         Route::get('/{id}/detail', [ParameterProdukController::class, 'detail'])->name('operator.parameter-produk.detail');
-        Route::get('/{id}/edit', [ParameterProdukController::class, 'edit'])->name('operator.parameter-produk.edit');
-        Route::put('/{id}/update', [ParameterProdukController::class, 'update'])->name('operator.parameter-produk.update');
+        Route::get('parameter-produk/{productionBatchId}/edit', [ParameterProdukController::class, 'edit'])->name('operator.parameter-produk.edit');
+Route::put('parameter-produk/{productionBatchId}', [ParameterProdukController::class, 'update'])->name('operator.parameter-produk.update');
         Route::delete('/{id}/delete', [ParameterProdukController::class, 'destroy'])->name('operator.parameter-produk.destroy');
         Route::post('/bulk-destroy', [ParameterProdukController::class, 'bulkDestroy'])->name('operator.parameter-produk.bulk-destroy');
     });
@@ -123,6 +124,8 @@ Route::prefix('operator')->middleware(['auth', 'role:Operator'])->group(function
         Route::get('/', [StandarParameterProdukController::class, 'index'])->name('operator.standar-parameter-produk.index');
         Route::get('/create', [StandarParameterProdukController::class, 'create'])->name('operator.standar-parameter-produk.create');
         Route::post('/store', [StandarParameterProdukController::class, 'store'])->name('operator.standar-parameter-produk.store');
+        Route::get('/import', [StandarParameterProdukController::class, 'importPage'])->name('operator.standar-parameter-produk.import');
+        Route::post('/import', [StandarParameterProdukController::class, 'upload'])->name('operator.standar-parameter-produk.upload');
         Route::get('/{productionBatchId}/detail', [StandarParameterProdukController::class, 'detail'])->name('operator.standar-parameter-produk.detail');
         Route::get('/{id}/edit', [StandarParameterProdukController::class, 'edit'])->name('operator.standar-parameter-produk.edit');
         Route::put('/{id}/update', [StandarParameterProdukController::class, 'update'])->name('operator.standar-parameter-produk.update');

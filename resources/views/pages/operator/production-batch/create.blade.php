@@ -38,7 +38,8 @@
                 </div>
             @endif
 
-            <form action="{{ route('operator.production-batch.store') }}" method="POST" id="form-production-batch">
+            <form action="{{ route('operator.production-batch.store') }}" method="POST" id="form-production-batch"
+                enctype="multipart/form-data">
                 @csrf
                 <div class="card mb-4">
                     <div class="card-header">
@@ -150,6 +151,55 @@
                     </div>
                 </div>
 
+                {{-- FOTO --}}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4><span class="step-badge">3</span> Dokumentasi Foto</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-4">
+                            Upload foto dari dokumen atau ambil langsung lewat kamera. Semua foto boleh dikosongkan.
+                        </p>
+
+                        <div class="row">
+                            @php
+                                $fotoList = [
+                                    'foto_kartu_rute' => 'Kartu Rute',
+                                    'foto_stamp_plastik' => 'Stamp Plastik',
+                                    'foto_stamp_box' => 'Stamp Box',
+                                    'foto_ed_plastik' => 'ED Plastik',
+                                    'foto_ed_carton_box' => 'ED Carton Box',
+                                ];
+                            @endphp
+
+                            @foreach ($fotoList as $field => $label)
+                                <div class="col-md-4 col-12 mb-3">
+                                    <div class="form-group mb-0">
+                                        <label class="filter-label">{{ $label }}</label>
+
+                                        <div class="foto-preview-wrapper mb-2" id="preview-wrapper-{{ $field }}"
+                                            style="display: none;">
+                                            <img id="preview-{{ $field }}" src="#"
+                                                alt="Preview {{ $label }}" class="d-block mb-2"
+                                                style="max-width: 100%; max-height: 150px; object-fit: contain; border: 1px solid #e9ecef; border-radius: 4px; padding: 4px;">
+                                        </div>
+
+                                        <input type="file" name="{{ $field }}" id="{{ $field }}"
+                                            accept="image/*" capture="environment"
+                                            class="form-control foto-input @error($field) is-invalid @enderror"
+                                            data-preview-target="preview-{{ $field }}"
+                                            data-preview-wrapper="preview-wrapper-{{ $field }}">
+
+                                        @error($field)
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card card-final mb-4">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center flex-wrap">
@@ -203,6 +253,26 @@
         document.addEventListener('DOMContentLoaded', function() {
             updateHari();
             document.getElementById('tanggal').addEventListener('change', updateHari);
+
+            document.querySelectorAll('.foto-input').forEach(function(input) {
+                input.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    const previewImg = document.getElementById(input.dataset.previewTarget);
+                    const previewWrapper = document.getElementById(input.dataset.previewWrapper);
+
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            previewImg.src = ev.target.result;
+                            previewWrapper.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        previewImg.src = '#';
+                        previewWrapper.style.display = 'none';
+                    }
+                });
+            });
         });
     </script>
 @endpush

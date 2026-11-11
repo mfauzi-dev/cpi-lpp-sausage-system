@@ -16,7 +16,7 @@ class LaporanPengendalianProdukSausageSheetLima extends LaporanPengendalianProdu
         $row = $this->table(
             $sheet,
             $row,
-            null,
+            'PACKING DALAM',
             [
                 'Petugas Pengemasan',
                 'Manual Single',
@@ -69,7 +69,7 @@ class LaporanPengendalianProdukSausageSheetLima extends LaporanPengendalianProdu
         return $this->table(
             $sheet,
             $row,
-            null,
+            'STANDAR MESIN PACKING DALAM',
             [
                 'Parameter Mesin',
                 'Sausage Cutter',

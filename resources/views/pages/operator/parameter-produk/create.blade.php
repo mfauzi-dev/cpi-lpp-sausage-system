@@ -96,15 +96,27 @@
                             <table class="table table-bordered table-wide" id="tableSampling">
                                 <thead>
                                     <tr>
-                                        <th class="text-center" width="60">No</th>
-                                        <th>Sampling Ke</th>
-                                        <th>Berat per 3 Pcs (gr)</th>
-                                        <th>Diameter (mm)</th>
-                                        <th>Panjang (cm)</th>
-                                        <th>Berat per Pcs (gr)</th>
-                                        <th>Berat Kulit (gr)</th>
-                                        <th>Berat Adonan (gr)</th>
-                                        <th>Berat per 3 Pcs Akhir (gr)</th>
+                                        <th rowspan="2" class="text-center align-middle" width="60">No</th>
+                                        <th rowspan="2" class="align-middle">Sampling Ke</th>
+                                        <th rowspan="2" class="align-middle">Berat per 3 Pcs (gr)</th>
+                                        <th colspan="2" class="text-center">Diameter (mm)</th>
+                                        <th colspan="2" class="text-center">Panjang (cm)</th>
+                                        <th colspan="2" class="text-center">Berat per Pcs (gr)</th>
+                                        <th colspan="2" class="text-center">Berat Kulit (gr)</th>
+                                        <th colspan="2" class="text-center">Berat Adonan (gr)</th>
+                                        <th rowspan="2" class="align-middle">Berat per 3 Pcs Akhir (gr)</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-center">Standar</th>
+                                        <th class="text-center">Aktual</th>
+                                        <th class="text-center">Standar</th>
+                                        <th class="text-center">Aktual</th>
+                                        <th class="text-center">Standar</th>
+                                        <th class="text-center">Aktual</th>
+                                        <th class="text-center">Standar</th>
+                                        <th class="text-center">Aktual</th>
+                                        <th class="text-center">Standar</th>
+                                        <th class="text-center">Aktual</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -121,31 +133,47 @@
                                                     class="form-control" step="0.01" min="0"
                                                     value="{{ old("sampling.$i.berat_per_3pcs") }}">
                                             </td>
+
+                                            <td class="text-center text-muted align-middle standar-value"
+                                                data-sampling="{{ $i }}" data-field="diameter">-</td>
                                             <td>
                                                 <input type="number" name="sampling[{{ $i }}][diameter]"
                                                     class="form-control" step="0.01" min="0"
                                                     value="{{ old("sampling.$i.diameter") }}">
                                             </td>
+
+                                            <td class="text-center text-muted align-middle standar-value"
+                                                data-sampling="{{ $i }}" data-field="panjang">-</td>
                                             <td>
                                                 <input type="number" name="sampling[{{ $i }}][panjang]"
                                                     class="form-control" step="0.01" min="0"
                                                     value="{{ old("sampling.$i.panjang") }}">
                                             </td>
+
+                                            <td class="text-center text-muted align-middle standar-value"
+                                                data-sampling="{{ $i }}" data-field="berat_per_pcs">-</td>
                                             <td>
                                                 <input type="number" name="sampling[{{ $i }}][berat_per_pcs]"
                                                     class="form-control" step="0.01" min="0"
                                                     value="{{ old("sampling.$i.berat_per_pcs") }}">
                                             </td>
+
+                                            <td class="text-center text-muted align-middle standar-value"
+                                                data-sampling="{{ $i }}" data-field="berat_kulit">-</td>
                                             <td>
                                                 <input type="number" name="sampling[{{ $i }}][berat_kulit]"
                                                     class="form-control" step="0.01" min="0"
                                                     value="{{ old("sampling.$i.berat_kulit") }}">
                                             </td>
+
+                                            <td class="text-center text-muted align-middle standar-value"
+                                                data-sampling="{{ $i }}" data-field="berat_adonan">-</td>
                                             <td>
                                                 <input type="number" name="sampling[{{ $i }}][berat_adonan]"
                                                     class="form-control" step="0.01" min="0"
                                                     value="{{ old("sampling.$i.berat_adonan") }}">
                                             </td>
+
                                             <td>
                                                 <input type="number"
                                                     name="sampling[{{ $i }}][berat_per_3pcs_akhir]"
@@ -184,6 +212,7 @@
 
             const tanggalInput = $('#tanggal');
             const batchSelect = $('#production_batch_id');
+            const standarMap = @json($standarMap);
 
             function resetInformasiProduksi() {
                 $('#batch_product').text('-');
@@ -191,10 +220,50 @@
                 $('#batch_shift').text('-');
             }
 
+            function resetStandar() {
+                $('.standar-value').text('-');
+            }
+
+            function formatAngka(value) {
+                if (value === null || value === undefined || value === '') {
+                    return '-';
+                }
+
+                return Number(value).toLocaleString('id-ID', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            function tampilkanStandar(productId) {
+                resetStandar();
+
+                if (!productId) {
+                    return;
+                }
+
+                const standarProduk = standarMap[productId];
+
+                if (!standarProduk) {
+                    return;
+                }
+
+                $('.standar-value').each(function() {
+                    const sampling = $(this).attr('data-sampling');
+                    const field = $(this).attr('data-field');
+                    const standarSampling = standarProduk[sampling];
+
+                    if (standarSampling) {
+                        $(this).text(formatAngka(standarSampling[field]));
+                    }
+                });
+            }
+
             function loadProductionBatches(date, selectedBatchId = '') {
                 batchSelect.empty().append('<option value="">Memuat production batch...</option>');
                 batchSelect.prop('disabled', true).trigger('change');
                 resetInformasiProduksi();
+                resetStandar();
 
                 if (!date) {
                     batchSelect.empty().append('<option value="">Pilih tanggal terlebih dahulu</option>');
@@ -222,6 +291,13 @@
                             const productName = batch.product ? batch.product.name : '-';
                             const kodeBatch = batch.kode_batch ?? '-';
                             const shift = batch.shift ?? '-';
+                            let productId = '';
+
+                            if (batch.product_id) {
+                                productId = batch.product_id;
+                            } else if (batch.product && batch.product.id) {
+                                productId = batch.product.id;
+                            }
 
                             batchSelect.append(
                                 $('<option>', {
@@ -229,6 +305,7 @@
                                     text: kodeBatch + ' - ' + productName +
                                         ' - Shift ' + shift
                                 }).attr('data-product', productName)
+                                .attr('data-product-id', productId)
                                 .attr('data-kode-batch', kodeBatch)
                                 .attr('data-shift', shift)
                             );
@@ -245,6 +322,7 @@
                             '<option value="">Gagal memuat production batch</option>');
                         batchSelect.prop('disabled', true).trigger('change');
                         resetInformasiProduksi();
+                        resetStandar();
                         console.error('Gagal mengambil production batch:', xhr.responseText);
                     }
                 });
@@ -255,6 +333,7 @@
 
                 if (!selectedOption.val()) {
                     resetInformasiProduksi();
+                    resetStandar();
                     return;
                 }
 
@@ -262,6 +341,8 @@
                 $('#batch_code').text(selectedOption.attr('data-kode-batch') || '-');
                 $('#batch_shift').text(selectedOption.attr('data-shift') ? 'Shift ' + selectedOption.attr(
                     'data-shift') : '-');
+
+                tampilkanStandar(selectedOption.attr('data-product-id'));
             });
 
             tanggalInput.on('change', function() {

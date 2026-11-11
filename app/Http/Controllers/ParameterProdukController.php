@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ParameterProduk;
 use App\Models\ProductionBatch;
+use App\Models\StandarParameterProduk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -46,7 +47,21 @@ class ParameterProdukController extends Controller
             ->latest('tanggal')
             ->get();
 
-        return view('pages.operator.parameter-produk.create', compact('productionBatches'));
+        $standarParameterProduks = StandarParameterProduk::orderBy('sampling_ke')->get();
+
+        $standarMap = [];
+
+        foreach ($standarParameterProduks as $standar) {
+            $standarMap[$standar->product_id][$standar->sampling_ke] = [
+                'diameter' => $standar->diameter,
+                'panjang' => $standar->panjang,
+                'berat_per_pcs' => $standar->berat_per_pcs,
+                'berat_kulit' => $standar->berat_kulit,
+                'berat_adonan' => $standar->berat_adonan,
+            ];
+        }
+
+        return view('pages.operator.parameter-produk.create', compact('productionBatches', 'standarMap'));
     }
 
     public function store(Request $request)
@@ -70,9 +85,17 @@ class ParameterProdukController extends Controller
             $hasSampling = false;
 
             foreach ($request->input('sampling', []) as $row) {
-                $isFilled = collect($row)->contains(function ($value) {
-                    return $value !== null && $value !== '';
-                });
+                $isFilled = false;
+
+                foreach ($row as $key => $value) {
+                    if ($key === 'sampling_ke') {
+                        continue;
+                    }
+
+                    if ($value !== null && $value !== '') {
+                        $isFilled = true;
+                    }
+                }
 
                 if ($isFilled) {
                     ParameterProduk::create([
@@ -119,54 +142,141 @@ class ParameterProdukController extends Controller
 
         abort_if($parameterProduks->isEmpty(), 404);
 
+        $parameterBySampling = [];
+
+        foreach ($parameterProduks as $item) {
+            $parameterBySampling[$item->sampling_ke] = $item;
+        }
+
+        $standarParameterProduks = StandarParameterProduk::where('product_id', $productionBatch->product_id)
+            ->orderBy('sampling_ke')
+            ->get();
+
+        $standarBySampling = [];
+
+        foreach ($standarParameterProduks as $standar) {
+            $standarBySampling[$standar->sampling_ke] = $standar;
+        }
+
         return view(
             'pages.operator.parameter-produk.detail',
-            compact('productionBatch', 'parameterProduks')
+            compact('productionBatch', 'parameterProduks', 'parameterBySampling', 'standarBySampling')
         );
     }
 
-    public function edit($id)
+    public function edit($productionBatchId)
     {
-        $parameterProduk = ParameterProduk::findOrFail($id);
+        $productionBatch = ProductionBatch::with('product')->findOrFail($productionBatchId);
 
-        $productionBatches = ProductionBatch::with('product')
-            ->latest('tanggal')
+        $parameterProduks = ParameterProduk::where('production_batch_id', $productionBatch->id)
+            ->orderBy('sampling_ke')
             ->get();
 
-        return view('pages.operator.parameter-produk.edit', compact('parameterProduk', 'productionBatches'));
+        abort_if($parameterProduks->isEmpty(), 404);
+
+        $parameterBySampling = [];
+
+        foreach ($parameterProduks as $item) {
+            $parameterBySampling[$item->sampling_ke] = $item;
+        }
+
+        $standarParameterProduks = StandarParameterProduk::where('product_id', $productionBatch->product_id)
+            ->orderBy('sampling_ke')
+            ->get();
+
+        $standarBySampling = [];
+
+        foreach ($standarParameterProduks as $standar) {
+            $standarBySampling[$standar->sampling_ke] = $standar;
+        }
+
+        return view(
+            'pages.operator.parameter-produk.edit',
+            compact('productionBatch', 'parameterBySampling', 'standarBySampling')
+        );
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $productionBatchId)
     {
         $request->validate([
-            'production_batch_id' => ['required', 'exists:production_batches,id'],
-            'sampling_ke' => ['required', 'integer', 'min:1'],
-            'berat_per_3pcs' => ['nullable', 'numeric', 'min:0'],
-            'diameter' => ['nullable', 'numeric', 'min:0'],
-            'panjang' => ['nullable', 'numeric', 'min:0'],
-            'berat_per_pcs' => ['nullable', 'numeric', 'min:0'],
-            'berat_kulit' => ['nullable', 'numeric', 'min:0'],
-            'berat_adonan' => ['nullable', 'numeric', 'min:0'],
-            'berat_per_3pcs_akhir' => ['nullable', 'numeric', 'min:0'],
+            'sampling' => ['required', 'array'],
+            'sampling.*.sampling_ke' => ['required', 'integer', 'min:1'],
+            'sampling.*.berat_per_3pcs' => ['nullable', 'numeric', 'min:0'],
+            'sampling.*.diameter' => ['nullable', 'numeric', 'min:0'],
+            'sampling.*.panjang' => ['nullable', 'numeric', 'min:0'],
+            'sampling.*.berat_per_pcs' => ['nullable', 'numeric', 'min:0'],
+            'sampling.*.berat_kulit' => ['nullable', 'numeric', 'min:0'],
+            'sampling.*.berat_adonan' => ['nullable', 'numeric', 'min:0'],
+            'sampling.*.berat_per_3pcs_akhir' => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $parameterProduk = ParameterProduk::findOrFail($id);
+        $productionBatch = ProductionBatch::findOrFail($productionBatchId);
 
-        $parameterProduk->update($request->only([
-            'production_batch_id',
-            'sampling_ke',
-            'berat_per_3pcs',
-            'diameter',
-            'panjang',
-            'berat_per_pcs',
-            'berat_kulit',
-            'berat_adonan',
-            'berat_per_3pcs_akhir',
-        ]));
+        DB::beginTransaction();
 
-        return redirect()
-            ->route('operator.parameter-produk.detail', $parameterProduk->production_batch_id)
-            ->with('success', 'Parameter produk berhasil diperbarui.');
+        try {
+            $hasSampling = false;
+
+            foreach ($request->input('sampling', []) as $row) {
+                $isFilled = false;
+
+                foreach ($row as $key => $value) {
+                    if ($key === 'sampling_ke') {
+                        continue;
+                    }
+
+                    if ($value !== null && $value !== '') {
+                        $isFilled = true;
+                    }
+                }
+
+                $existing = ParameterProduk::where('production_batch_id', $productionBatch->id)
+                    ->where('sampling_ke', $row['sampling_ke'])
+                    ->first();
+
+                if ($isFilled) {
+                    $data = [
+                        'production_batch_id' => $productionBatch->id,
+                        'sampling_ke' => $row['sampling_ke'],
+                        'berat_per_3pcs' => $row['berat_per_3pcs'] ?? null,
+                        'diameter' => $row['diameter'] ?? null,
+                        'panjang' => $row['panjang'] ?? null,
+                        'berat_per_pcs' => $row['berat_per_pcs'] ?? null,
+                        'berat_kulit' => $row['berat_kulit'] ?? null,
+                        'berat_adonan' => $row['berat_adonan'] ?? null,
+                        'berat_per_3pcs_akhir' => $row['berat_per_3pcs_akhir'] ?? null,
+                    ];
+
+                    if ($existing) {
+                        $existing->update($data);
+                    } else {
+                        ParameterProduk::create($data);
+                    }
+
+                    $hasSampling = true;
+                } else {
+                    if ($existing) {
+                        $existing->delete();
+                    }
+                }
+            }
+
+            if (!$hasSampling) {
+                throw new \Exception('Minimal satu data sampling harus diisi.');
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('operator.parameter-produk.detail', $productionBatch->id)
+                ->with('success', 'Parameter produk berhasil diperbarui.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui parameter produk: ' . $e->getMessage());
+        }
     }
 
     public function destroy($id)
@@ -233,9 +343,25 @@ class ParameterProdukController extends Controller
 
         abort_if($parameterProduks->isEmpty(), 404);
 
+        $parameterBySampling = [];
+
+        foreach ($parameterProduks as $item) {
+            $parameterBySampling[$item->sampling_ke] = $item;
+        }
+
+        $standarParameterProduks = StandarParameterProduk::where('product_id', $productionBatch->product_id)
+            ->orderBy('sampling_ke')
+            ->get();
+
+        $standarBySampling = [];
+
+        foreach ($standarParameterProduks as $standar) {
+            $standarBySampling[$standar->sampling_ke] = $standar;
+        }
+
         return view(
             'pages.manager.parameter-produk.detail',
-            compact('productionBatch', 'parameterProduks')
+            compact('productionBatch', 'parameterProduks', 'parameterBySampling', 'standarBySampling')
         );
     }
 }

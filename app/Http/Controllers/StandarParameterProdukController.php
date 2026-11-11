@@ -2,57 +2,43 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\StandarParameterProdukImport;
+use App\Models\Product;
 use App\Models\StandarParameterProduk;
-use App\Models\ProductionBatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StandarParameterProdukController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ProductionBatch::query()
-            ->withCount('standarParameterProduks')
-            ->with('product');
+        $query = Product::query()->withCount('standarParameterProduks');
 
-        if ($request->filled('kode_batch')) {
-            $query->where('kode_batch', 'like', '%' . $request->kode_batch . '%');
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
         }
 
-        if ($request->filled('date_from')) {
-            $query->whereDate('tanggal', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('tanggal', '<=', $request->date_to);
-        }
-
-        if ($request->filled('shift')) {
-            $query->where('shift', $request->shift);
-        }
-
-        $productionBatches = $query
+        $products = $query
             ->whereHas('standarParameterProduks')
-            ->latest('tanggal')
+            ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
 
-        return view('pages.operator.standar-parameter-produk.index', compact('productionBatches'));
+        return view('pages.operator.standar-parameter-produk.index', compact('products'));
     }
 
     public function create()
     {
-        $productionBatches = ProductionBatch::with('product')
-            ->latest('tanggal')
-            ->get();
+        $products = Product::orderBy('name')->get();
 
-        return view('pages.operator.standar-parameter-produk.create', compact('productionBatches'));
+        return view('pages.operator.standar-parameter-produk.create', compact('products'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'production_batch_id' => ['required', 'exists:production_batches,id'],
+            'product_id' => ['required', 'exists:products,id'],
             'sampling' => ['nullable', 'array'],
             'sampling.*.sampling_ke' => ['required', 'integer', 'min:1'],
             'sampling.*.diameter' => ['nullable', 'numeric', 'min:0'],
@@ -74,7 +60,7 @@ class StandarParameterProdukController extends Controller
 
                 if ($isFilled) {
                     StandarParameterProduk::create([
-                        'production_batch_id' => $request->production_batch_id,
+                        'product_id' => $request->product_id,
                         'sampling_ke' => $row['sampling_ke'],
                         'diameter' => $row['diameter'] ?? null,
                         'panjang' => $row['panjang'] ?? null,
@@ -105,11 +91,42 @@ class StandarParameterProdukController extends Controller
         }
     }
 
-    public function detail($productionBatchId)
+    public function importPage()
     {
-        $productionBatch = ProductionBatch::with('product')->findOrFail($productionBatchId);
+        $products = Product::orderBy('name')->get();
 
-        $standarParameterProduks = StandarParameterProduk::where('production_batch_id', $productionBatch->id)
+        return view('pages.operator.standar-parameter-produk.import', compact('products'));
+    }
+
+    public function upload(Request $request)
+    {
+        $request->validate([
+            'product_id' => ['required', 'exists:products,id'],
+            'file' => ['required', 'file', 'mimes:xlsx,xls'],
+        ]);
+
+        try {
+            $import = new StandarParameterProdukImport((int) $request->product_id);
+
+            Excel::import($import, $request->file('file'));
+
+            $summary = $import->getSummary();
+
+            return redirect()
+                ->route('operator.standar-parameter-produk.detail', $request->product_id)
+                ->with('success', "Import selesai: {$summary['imported']} baris sampling tersimpan, {$summary['skipped']} dilewati.");
+        } catch (\Throwable $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal mengimpor data: ' . $e->getMessage());
+        }
+    }
+
+    public function detail($productId)
+    {
+        $product = Product::findOrFail($productId);
+
+        $standarParameterProduks = StandarParameterProduk::where('product_id', $product->id)
             ->orderBy('sampling_ke')
             ->get();
 
@@ -117,7 +134,7 @@ class StandarParameterProdukController extends Controller
 
         return view(
             'pages.operator.standar-parameter-produk.detail',
-            compact('productionBatch', 'standarParameterProduks')
+            compact('product', 'standarParameterProduks')
         );
     }
 
@@ -125,20 +142,18 @@ class StandarParameterProdukController extends Controller
     {
         $standarParameterProduk = StandarParameterProduk::findOrFail($id);
 
-        $productionBatches = ProductionBatch::with('product')
-            ->latest('tanggal')
-            ->get();
+        $products = Product::orderBy('name')->get();
 
         return view(
             'pages.operator.standar-parameter-produk.edit',
-            compact('standarParameterProduk', 'productionBatches')
+            compact('standarParameterProduk', 'products')
         );
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'production_batch_id' => ['required', 'exists:production_batches,id'],
+            'product_id' => ['required', 'exists:products,id'],
             'sampling_ke' => ['required', 'integer', 'min:1'],
             'diameter' => ['nullable', 'numeric', 'min:0'],
             'panjang' => ['nullable', 'numeric', 'min:0'],
@@ -150,7 +165,7 @@ class StandarParameterProdukController extends Controller
         $standarParameterProduk = StandarParameterProduk::findOrFail($id);
 
         $standarParameterProduk->update($request->only([
-            'production_batch_id',
+            'product_id',
             'sampling_ke',
             'diameter',
             'panjang',
@@ -160,7 +175,7 @@ class StandarParameterProdukController extends Controller
         ]));
 
         return redirect()
-            ->route('operator.standar-parameter-produk.detail', $standarParameterProduk->production_batch_id)
+            ->route('operator.standar-parameter-produk.detail', $standarParameterProduk->product_id)
             ->with('success', 'Standar parameter produk berhasil diperbarui.');
     }
 
@@ -168,18 +183,18 @@ class StandarParameterProdukController extends Controller
     {
         try {
             $standarParameterProduk = StandarParameterProduk::findOrFail($id);
-            $productionBatchId = $standarParameterProduk->production_batch_id;
+            $productId = $standarParameterProduk->product_id;
 
             $standarParameterProduk->delete();
 
-            $remaining = StandarParameterProduk::where('production_batch_id', $productionBatchId)->count();
+            $remaining = StandarParameterProduk::where('product_id', $productId)->count();
 
             return redirect()
                 ->route(
                     $remaining > 0
                         ? 'operator.standar-parameter-produk.detail'
                         : 'operator.standar-parameter-produk.index',
-                    $remaining > 0 ? $productionBatchId : []
+                    $remaining > 0 ? $productId : []
                 )
                 ->with('success', 'Standar parameter produk berhasil dihapus.');
         } catch (\Throwable $e) {
@@ -189,40 +204,26 @@ class StandarParameterProdukController extends Controller
 
     public function managerIndex(Request $request)
     {
-        $query = ProductionBatch::query()
-            ->withCount('standarParameterProduks')
-            ->with('product');
+        $query = Product::query()->withCount('standarParameterProduks');
 
-        if ($request->filled('kode_batch')) {
-            $query->where('kode_batch', 'like', '%' . $request->kode_batch . '%');
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
         }
 
-        if ($request->filled('date_from')) {
-            $query->whereDate('tanggal', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('tanggal', '<=', $request->date_to);
-        }
-
-        if ($request->filled('shift')) {
-            $query->where('shift', $request->shift);
-        }
-
-        $productionBatches = $query
+        $products = $query
             ->whereHas('standarParameterProduks')
-            ->latest('tanggal')
+            ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
 
-        return view('pages.manager.standar-parameter-produk.index', compact('productionBatches'));
+        return view('pages.manager.standar-parameter-produk.index', compact('products'));
     }
 
-    public function managerDetail($productionBatchId)
+    public function managerDetail($productId)
     {
-        $productionBatch = ProductionBatch::with('product')->findOrFail($productionBatchId);
+        $product = Product::findOrFail($productId);
 
-        $standarParameterProduks = StandarParameterProduk::where('production_batch_id', $productionBatch->id)
+        $standarParameterProduks = StandarParameterProduk::where('product_id', $product->id)
             ->orderBy('sampling_ke')
             ->get();
 
@@ -230,7 +231,7 @@ class StandarParameterProdukController extends Controller
 
         return view(
             'pages.manager.standar-parameter-produk.detail',
-            compact('productionBatch', 'standarParameterProduks')
+            compact('product', 'standarParameterProduks')
         );
     }
 }

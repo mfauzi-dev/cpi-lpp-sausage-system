@@ -18,7 +18,7 @@ class ProduksiBahanBakuController extends Controller
         $formulas = ProductFormula::with('bahanBaku:id,name')
             ->where('product_id', $batch->product_id)
             ->orderBy('multiplier')
-            ->get(['id', 'bahan_baku_id', 'multiplier', 'qty']);
+            ->get(['id', 'bahan_baku_id', 'multiplier', 'total_kg']);
 
         return response()->json($formulas);
     }
@@ -77,7 +77,6 @@ class ProduksiBahanBakuController extends Controller
             'items.*.product_formula_id' => ['nullable', 'exists:product_formulas,id'],
             'items.*.kode_batch' => ['nullable', 'string', 'max:100'],
             'items.*.best_before' => ['nullable', 'date'],
-            'items.*.total_kg' => ['nullable', 'numeric', 'min:0'],
             'items.*.suhu_rm' => ['nullable', 'numeric'],
         ]);
 
@@ -91,9 +90,9 @@ class ProduksiBahanBakuController extends Controller
             $hasItem = false;
 
             foreach ($request->items as $row) {
-                $isFilled = !empty($row['kode_batch'])
+                $isFilled = !empty($row['product_formula_id'])
+                    || !empty($row['kode_batch'])
                     || !empty($row['best_before'])
-                    || !empty($row['total_kg'])
                     || !empty($row['suhu_rm']);
 
                 if ($isFilled) {
@@ -102,7 +101,6 @@ class ProduksiBahanBakuController extends Controller
                         'product_formula_id' => $row['product_formula_id'] ?? null,
                         'kode_batch' => $row['kode_batch'] ?? null,
                         'best_before' => $row['best_before'] ?? null,
-                        'total_kg' => $row['total_kg'] ?? 0,
                         'suhu_rm' => $row['suhu_rm'] ?? null,
                     ]);
 
@@ -115,7 +113,11 @@ class ProduksiBahanBakuController extends Controller
             }
 
             $penggunaan = (float) $request->penggunaan;
-            $total = (float) $produksi->items()->sum('total_kg');
+
+            $total = (float) $produksi->items()
+                ->with('productFormula:id,total_kg')
+                ->get()
+                ->sum(fn ($item) => $item->productFormula->total_kg ?? 0);
 
             if ($penggunaan > $total) {
                 throw new \Exception('Penggunaan tidak boleh melebihi total bahan baku.');
@@ -154,7 +156,7 @@ class ProduksiBahanBakuController extends Controller
 
     public function edit($id)
     {
-        $produksi = ProduksiBahanBaku::with(['productionBatch.product', 'items.bahanBaku','items.productFormula'])
+        $produksi = ProduksiBahanBaku::with(['productionBatch.product', 'items.bahanBaku', 'items.productFormula'])
                         ->findOrFail($id);
 
         $bahanBakus = BahanBaku::orderBy('name')->get();
@@ -183,7 +185,6 @@ class ProduksiBahanBakuController extends Controller
             'items.*.product_formula_id' => ['nullable', 'exists:product_formulas,id'],
             'items.*.kode_batch' => ['nullable', 'string', 'max:100'],
             'items.*.best_before' => ['nullable', 'date'],
-            'items.*.total_kg' => ['nullable', 'numeric', 'min:0'],
             'items.*.suhu_rm' => ['nullable', 'numeric'],
         ]);
 
@@ -201,9 +202,9 @@ class ProduksiBahanBakuController extends Controller
             $hasItem = false;
 
             foreach ($request->items as $row) {
-                $isFilled = !empty($row['kode_batch'])
+                $isFilled = !empty($row['product_formula_id'])
+                    || !empty($row['kode_batch'])
                     || !empty($row['best_before'])
-                    || !empty($row['total_kg'])
                     || !empty($row['suhu_rm']);
 
                 if ($isFilled) {
@@ -212,7 +213,6 @@ class ProduksiBahanBakuController extends Controller
                         'product_formula_id' => $row['product_formula_id'] ?? null,
                         'kode_batch' => $row['kode_batch'] ?? null,
                         'best_before' => $row['best_before'] ?? null,
-                        'total_kg' => $row['total_kg'] ?? 0,
                         'suhu_rm' => $row['suhu_rm'] ?? null,
                     ]);
 
@@ -225,7 +225,11 @@ class ProduksiBahanBakuController extends Controller
             }
 
             $penggunaan = (float) $request->penggunaan;
-            $total = (float) $produksi->items()->sum('total_kg');
+
+            $total = (float) $produksi->items()
+                ->with('productFormula:id,total_kg')
+                ->get()
+                ->sum(fn ($item) => $item->productFormula->total_kg ?? 0);
 
             if ($penggunaan > $total) {
                 throw new \Exception('Penggunaan tidak boleh melebihi total bahan baku.');
@@ -342,7 +346,11 @@ class ProduksiBahanBakuController extends Controller
                     ->with('success', $deleted . ' item bahan baku berhasil dihapus. Data produksi bahan baku ikut terhapus karena sudah tidak ada item tersisa.');
             }
 
-            $total = (float) $produksi->items()->sum('total_kg');
+            $total = (float) $produksi->items()
+                ->with('productFormula:id,total_kg')
+                ->get()
+                ->sum(fn ($item) => $item->productFormula->total_kg ?? 0);
+
             $penggunaan = (float) $produksi->penggunaan;
 
             if ($penggunaan > $total) {

@@ -46,35 +46,11 @@
             <div class="card-body">
                 <form method="GET" action="{{ route('operator.standar-parameter-produk.index') }}">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="form-group">
-                                <label class="filter-label">Kode Batch</label>
-                                <input type="text" name="kode_batch" class="form-control"
-                                    placeholder="Cari kode batch..." value="{{ request('kode_batch') }}">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label class="filter-label">Tanggal Dari</label>
-                                <input type="date" name="date_from" class="form-control"
-                                    value="{{ request('date_from') }}">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label class="filter-label">Tanggal Sampai</label>
-                                <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label class="filter-label">Shift</label>
-                                <select name="shift" class="form-control">
-                                    <option value="">Semua Shift</option>
-                                    <option value="1" {{ request('shift') == '1' ? 'selected' : '' }}>Shift 1</option>
-                                    <option value="2" {{ request('shift') == '2' ? 'selected' : '' }}>Shift 2</option>
-                                    <option value="3" {{ request('shift') == '3' ? 'selected' : '' }}>Shift 3</option>
-                                </select>
+                                <label class="filter-label">Nama Produk</label>
+                                <input type="text" name="name" class="form-control" placeholder="Cari nama produk..."
+                                    value="{{ request('name') }}">
                             </div>
                         </div>
                     </div>
@@ -100,30 +76,22 @@
                         <thead>
                             <tr>
                                 <th class="text-center" width="60">No</th>
-                                <th>Tanggal</th>
-                                <th>Shift</th>
-                                <th>Kode Batch</th>
                                 <th>Nama Produk</th>
                                 <th class="text-center">Jumlah Sampling</th>
                                 <th class="text-center" width="150">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($productionBatches as $index => $productionBatch)
+                            @forelse ($products as $index => $product)
                                 <tr>
-                                    <td class="text-center">{{ $productionBatches->firstItem() + $index }}</td>
-                                    <td>
-                                        {{ $productionBatch->tanggal ? \Carbon\Carbon::parse($productionBatch->tanggal)->format('d/m/Y') : '-' }}
-                                    </td>
-                                    <td>{{ $productionBatch->shift ? 'Shift ' . $productionBatch->shift : '-' }}</td>
-                                    <td>{{ $productionBatch->kode_batch ?? '-' }}</td>
-                                    <td>{{ $productionBatch->product->name ?? '-' }}</td>
+                                    <td class="text-center">{{ $products->firstItem() + $index }}</td>
+                                    <td>{{ $product->name }}</td>
                                     <td class="text-center">
-                                        {{ $productionBatch->standar_parameter_produks_count }} sampling
+                                        {{ $product->standar_parameter_produks_count }} sampling
                                     </td>
                                     <td class="text-center">
                                         <div class="action-buttons">
-                                            <a href="{{ route('operator.standar-parameter-produk.detail', $productionBatch->id) }}"
+                                            <a href="{{ route('operator.standar-parameter-produk.detail', $product->id) }}"
                                                 class="btn btn-outline-info" title="Detail">
                                                 <i class="fas fa-file-alt"></i> Lihat Detail
                                             </a>
@@ -132,7 +100,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7">
+                                    <td colspan="4">
                                         <div class="empty-state">
                                             <i class="fas fa-clipboard-list d-block"></i>
                                             <div>Belum ada data standar parameter produk.</div>
@@ -145,7 +113,7 @@
                 </div>
             </div>
             <div class="card-footer bg-white border-top">
-                {{ $productionBatches->withQueryString()->links() }}
+                {{ $products->withQueryString()->links() }}
             </div>
         </div>
     </div>

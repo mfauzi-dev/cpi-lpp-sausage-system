@@ -113,11 +113,11 @@
                                     <tr>
                                         <td class="text-center font-weight-bold">{{ $samplingPackingLuar->sampling_ke }}
                                         </td>
-                                        <td>{{ $samplingPackingLuar->berat_per_bok !== null ? number_format($samplingPackingLuar->berat_per_bok, 2, ',', '.') : '-' }}
+                                        <td>{{ $samplingPackingLuar->berat_per_bok !== null ? $samplingPackingLuar->berat_per_bok : '-' }}
                                         </td>
-                                        <td>{{ $samplingPackingLuar->range_berat !== null ? number_format($samplingPackingLuar->range_berat, 2, ',', '.') : '-' }}
+                                        <td>{{ $samplingPackingLuar->range_berat !== null ? $samplingPackingLuar->range_berat : '-' }}
                                         </td>
-                                        <td>{{ $samplingPackingLuar->standar_berat !== null ? number_format($samplingPackingLuar->standar_berat, 2, ',', '.') : '-' }}
+                                        <td>{{ $samplingPackingLuar->standar_berat !== null ? $samplingPackingLuar->standar_berat : '-' }}
                                         </td>
                                         <td class="text-center">
                                             <div class="action-buttons">

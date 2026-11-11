@@ -55,9 +55,9 @@ class SamplingPackingLuarController extends Controller
             'production_batch_id' => ['required', 'exists:production_batches,id'],
             'sampling' => ['nullable', 'array'],
             'sampling.*.sampling_ke' => ['required', 'integer', 'min:1'],
-            'sampling.*.berat_per_bok' => ['nullable', 'numeric', 'min:0'],
-            'sampling.*.range_berat' => ['nullable', 'numeric', 'min:0'],
-            'sampling.*.standar_berat' => ['nullable', 'numeric', 'min:0'],
+            'sampling.*.berat_per_bok' => ['nullable'],
+            'sampling.*.range_berat' => ['nullable'],
+            'sampling.*.standar_berat' => ['nullable'],
         ]);
  
         DB::beginTransaction();
@@ -136,9 +136,9 @@ class SamplingPackingLuarController extends Controller
         $request->validate([
             'production_batch_id' => ['required', 'exists:production_batches,id'],
             'sampling_ke' => ['required', 'integer', 'min:1'],
-            'berat_per_bok' => ['nullable', 'numeric', 'min:0'],
-            'range_berat' => ['nullable', 'numeric', 'min:0'],
-            'standar_berat' => ['nullable', 'numeric', 'min:0'],
+            'berat_per_bok' => ['nullable'],
+            'range_berat' => ['nullable'],
+            'standar_berat' => ['nullable'],
         ]);
  
         $samplingPackingLuar = SamplingPackingLuar::findOrFail($id);

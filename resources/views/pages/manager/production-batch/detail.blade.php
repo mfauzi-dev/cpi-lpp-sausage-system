@@ -244,6 +244,18 @@
             background: #FAFBF9;
         }
 
+        /* Baris total di tfoot, dibuat menonjol dari baris data biasa */
+        .pb-page .table tfoot th,
+        .pb-page .table tfoot td {
+            background: var(--pb-primary-light);
+            color: var(--pb-primary);
+            font-weight: 700;
+            font-size: 0.85rem;
+            border-top: 2px solid var(--pb-primary);
+            white-space: nowrap;
+            padding: 0.8rem 0.9rem;
+        }
+
         .pb-page .badge-soft {
             display: inline-block;
             background: var(--pb-primary-light);
@@ -274,6 +286,50 @@
         .pb-page .btn-excel:hover {
             background: #DCEAE6;
             color: #153B35;
+        }
+
+        /* Galeri foto dokumentasi */
+        .pb-page .foto-item {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .pb-page .foto-item .foto-thumb {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--pb-border);
+            display: block;
+            margin-bottom: 0.5rem;
+            background: var(--pb-soft);
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+
+        .pb-page .foto-item a:hover .foto-thumb {
+            transform: scale(1.03);
+            box-shadow: 0 4px 10px rgba(15, 30, 25, 0.12);
+        }
+
+        .pb-page .foto-empty {
+            width: 100%;
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed var(--pb-border);
+            border-radius: 8px;
+            color: var(--pb-muted);
+            background: var(--pb-soft);
+            margin-bottom: 0.5rem;
+            font-size: 1.4rem;
+            opacity: .6;
+        }
+
+        .pb-page .foto-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--pb-muted);
         }
 
         @media (max-width: 767.98px) {
@@ -377,10 +433,48 @@
                 </div>
             </div>
 
-            {{-- 2. PRODUKSI BAHAN BAKU (tambah baris -> table) --}}
+            {{-- 2. DOKUMENTASI FOTO --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">2</span> Produksi Bahan Baku</h4>
+                    <h4><span class="step-badge">2</span> Dokumentasi Foto</h4>
+                </div>
+                <div class="card-body">
+                    @php
+                        $fotoList = [
+                            'foto_kartu_rute' => 'Kartu Rute',
+                            'foto_stamp_plastik' => 'Stamp Plastik',
+                            'foto_stamp_box' => 'Stamp Box',
+                            'foto_ed_plastik' => 'ED Plastik',
+                            'foto_ed_carton_box' => 'ED Carton Box',
+                        ];
+                    @endphp
+
+                    <div class="row justify-content-center">
+                        @foreach ($fotoList as $field => $label)
+                            <div class="col-md-4 col-sm-6 col-12 foto-item">
+                                @if ($productionBatch->{$field})
+                                    <a href="{{ asset('storage/' . $productionBatch->{$field}) }}" target="_blank"
+                                        rel="noopener">
+                                        <img src="{{ asset('storage/' . $productionBatch->{$field}) }}"
+                                            alt="{{ $label }}" class="foto-thumb">
+                                    </a>
+                                @else
+                                    <div class="foto-empty">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                @endif
+
+                                <div class="foto-label">{{ $label }}</div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            {{-- 3. PRODUKSI BAHAN BAKU (tambah baris -> table) --}}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4><span class="step-badge">3</span> Produksi Bahan Baku</h4>
                 </div>
                 <div class="card-body">
                     @forelse ($productionBatch->produksiBahanBaku as $produksi)
@@ -428,13 +522,24 @@
                                                     <td>{{ $item->best_before ? $item->best_before->format('d M Y') : '-' }}
                                                     </td>
                                                     <td class="text-right">
-                                                        {{ number_format((float) $item->total_kg, 2, ',', '.') }}</td>
+                                                        {{ number_format((float) $item->productFormula->total_kg, 3, ',', '.') }}
+                                                    </td>
                                                     <td class="text-right">
                                                         {{ $item->suhu_rm !== null ? number_format((float) $item->suhu_rm, 1, ',', '.') : '-' }}
                                                     </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan="4" class="text-right">Total Bahan Baku</th>
+                                                <th class="text-right">
+                                                    {{ number_format((float) $produksi->total, 2, ',', '.') }}
+                                                    Kg
+                                                </th>
+                                                <th></th>
+                                            </tr>
+                                        </tfoot>
                                     </table>
                                 </div>
                             @else
@@ -451,10 +556,10 @@
                 </div>
             </div>
 
-            {{-- 3. PENGGUNAAN MESIN (single-submit -> card) --}}
+            {{-- 4. PENGGUNAAN MESIN (single-submit -> card) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">3</span> Penggunaan Mesin</h4>
+                    <h4><span class="step-badge">4</span> Penggunaan Mesin</h4>
                 </div>
                 <div class="card-body">
                     @forelse ($productionBatch->pengguaanMesins as $mesin)
@@ -569,10 +674,10 @@
                 </div>
             </div>
 
-            {{-- 4. PARAMETER PRODUK (sampling -> table) --}}
+            {{-- 5. PARAMETER PRODUK (sampling -> table) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">4</span> Parameter Produk</h4>
+                    <h4><span class="step-badge">5</span> Parameter Produk</h4>
                 </div>
                 <div class="card-body p-0">
                     @if ($productionBatch->parameterProduks->count())
@@ -629,10 +734,10 @@
                 </div>
             </div>
 
-            {{-- 5. STANDAR PARAMETER PRODUK (sampling -> table) --}}
+            {{-- 6. STANDAR PARAMETER PRODUK (sampling -> table) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">5</span> Standar Parameter Produk</h4>
+                    <h4><span class="step-badge">6</span> Standar Parameter Produk</h4>
                 </div>
                 <div class="card-body p-0">
                     @if ($productionBatch->standarParameterProduks->count())
@@ -681,10 +786,10 @@
                 </div>
             </div>
 
-            {{-- 6. SUHU AREA (fixed category table per entry) --}}
+            {{-- 7. SUHU AREA (fixed category table per entry) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">6</span> Suhu Area</h4>
+                    <h4><span class="step-badge">7</span> Suhu Area</h4>
                 </div>
                 <div class="card-body">
                     @php
@@ -735,10 +840,10 @@
                 </div>
             </div>
 
-            {{-- 7. PARAMETER PEMASAKAN (fixed stage table per entry) --}}
+            {{-- 8. PARAMETER PEMASAKAN (fixed stage table per entry) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">7</span> Parameter Pemasakan</h4>
+                    <h4><span class="step-badge">8</span> Parameter Pemasakan</h4>
                 </div>
                 <div class="card-body">
                     @php
@@ -808,10 +913,10 @@
                 </div>
             </div>
 
-            {{-- 8. MONITORING PEMASAKAN (single-submit -> card) --}}
+            {{-- 9. MONITORING PEMASAKAN (single-submit -> card) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">8</span> Monitoring Pemasakan</h4>
+                    <h4><span class="step-badge">9</span> Monitoring Pemasakan</h4>
                 </div>
                 <div class="card-body">
                     @forelse ($productionBatch->monitoringPemasakans as $mp)
@@ -947,10 +1052,10 @@
                 </div>
             </div>
 
-            {{-- 9. MONITORING LINE BASO (single-submit -> card) --}}
+            {{-- 10. MONITORING LINE BASO (single-submit -> card) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">9</span> Monitoring Line Baso</h4>
+                    <h4><span class="step-badge">10</span> Monitoring Line Baso</h4>
                 </div>
                 <div class="card-body">
                     @forelse ($productionBatch->monitoringLineBasos as $mlb)
@@ -1056,10 +1161,10 @@
                 </div>
             </div>
 
-            {{-- 10. REJECT (fixed category table per entry) --}}
+            {{-- 11. REJECT (fixed category table per entry) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">10</span> Reject</h4>
+                    <h4><span class="step-badge">11</span> Reject</h4>
                 </div>
                 <div class="card-body">
                     @forelse ($productionBatch->rejects as $reject)
@@ -1150,10 +1255,10 @@
                 </div>
             </div>
 
-            {{-- 11. PACKING DALAM (single-submit -> card) --}}
+            {{-- 12. PACKING DALAM (single-submit -> card) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">11</span> Packing Dalam</h4>
+                    <h4><span class="step-badge">12</span> Packing Dalam</h4>
                 </div>
                 <div class="card-body">
                     @forelse ($productionBatch->packingDalams as $pd)
@@ -1272,10 +1377,10 @@
                 </div>
             </div>
 
-            {{-- 12. STANDAR MESIN PACKING DALAM (tabel tetap per batch, satu baris per parameter mesin) --}}
+            {{-- 13. STANDAR MESIN PACKING DALAM (tabel tetap per batch, satu baris per parameter mesin) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">12</span> Standar Mesin Packing Dalam</h4>
+                    <h4><span class="step-badge">13</span> Standar Mesin Packing Dalam</h4>
                 </div>
                 <div class="card-body p-0">
                     @if ($productionBatch->standarMesinPackingDalams->count())
@@ -1312,10 +1417,10 @@
                 </div>
             </div>
 
-            {{-- 13. PENGEMASAN PLASTIK PACKING DALAM (tambah baris -> table) --}}
+            {{-- 14. PENGEMASAN PLASTIK PACKING DALAM (tambah baris -> table) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">13</span> Pengemasan Plastik Packing Dalam</h4>
+                    <h4><span class="step-badge">14</span> Pengemasan Plastik Packing Dalam</h4>
                 </div>
                 <div class="card-body p-0">
                     @if ($productionBatch->pengemasanPlastikPackingDalams->count())
@@ -1360,10 +1465,10 @@
                 </div>
             </div>
 
-            {{-- 14. METAL DETECTOR (tabel tetap per batch, satu baris per jenis pemeriksaan) --}}
+            {{-- 15. METAL DETECTOR (tabel tetap per batch, satu baris per jenis pemeriksaan) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">14</span> Metal Detector</h4>
+                    <h4><span class="step-badge">15</span> Metal Detector</h4>
                 </div>
                 <div class="card-body p-0">
                     @if ($productionBatch->metalDetectors->count())
@@ -1406,10 +1511,10 @@
                 </div>
             </div>
 
-            {{-- 15. SAMPLING PACKING DALAM (sampling -> table) --}}
+            {{-- 16. SAMPLING PACKING DALAM (sampling -> table) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">15</span> Sampling Packing Dalam</h4>
+                    <h4><span class="step-badge">16</span> Sampling Packing Dalam</h4>
                 </div>
                 <div class="card-body p-0">
                     @if ($productionBatch->samplingPackingDalams->count())
@@ -1454,10 +1559,10 @@
                 </div>
             </div>
 
-            {{-- 16. PACKING LUAR (single-submit -> card) --}}
+            {{-- 17. PACKING LUAR (single-submit -> card) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">16</span> Packing Luar</h4>
+                    <h4><span class="step-badge">17</span> Packing Luar</h4>
                 </div>
                 <div class="card-body">
                     @forelse ($productionBatch->packingLuars as $pl)
@@ -1557,10 +1662,10 @@
                 </div>
             </div>
 
-            {{-- 17. PENGEMASAN PACKING LUAR (tabel tetap per batch, satu baris per parameter packing luar) --}}
+            {{-- 18. PENGEMASAN PACKING LUAR (tabel tetap per batch, satu baris per parameter packing luar) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">17</span> Pengemasan Packing Luar</h4>
+                    <h4><span class="step-badge">18</span> Pengemasan Packing Luar</h4>
                 </div>
                 <div class="card-body p-0">
                     @if ($productionBatch->pengemasanPackingLuars->count())
@@ -1603,10 +1708,10 @@
                 </div>
             </div>
 
-            {{-- 18. SAMPLING PACKING LUAR (sampling -> table) --}}
+            {{-- 19. SAMPLING PACKING LUAR (sampling -> table) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">18</span> Sampling Packing Luar</h4>
+                    <h4><span class="step-badge">19</span> Sampling Packing Luar</h4>
                 </div>
                 <div class="card-body p-0">
                     @if ($productionBatch->samplingPackingLuars->count())
@@ -1647,10 +1752,10 @@
                 </div>
             </div>
 
-            {{-- 19. REKAPITULASI PACKING LUAR (single-submit -> card) --}}
+            {{-- 20. REKAPITULASI PACKING LUAR (single-submit -> card) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">19</span> Rekapitulasi Packing Luar</h4>
+                    <h4><span class="step-badge">20</span> Rekapitulasi Packing Luar</h4>
                 </div>
                 <div class="card-body">
                     @forelse ($productionBatch->rekapitulasiPackingLuars as $rpl)
@@ -1789,10 +1894,10 @@
                 </div>
             </div>
 
-            {{-- 20. KARTON BOX PACKING LUAR (tambah baris -> table) --}}
+            {{-- 21. KARTON BOX PACKING LUAR (tambah baris -> table) --}}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">20</span> Karton Box Packing Luar</h4>
+                    <h4><span class="step-badge">21</span> Karton Box Packing Luar</h4>
                 </div>
                 <div class="card-body p-0">
                     @if ($productionBatch->kartonBoxPackingLuar->count())

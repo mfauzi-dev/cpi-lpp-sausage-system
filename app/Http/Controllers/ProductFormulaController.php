@@ -33,7 +33,7 @@ class ProductFormulaController extends Controller
         $request->validate([
             'bahan_baku_id' => ['required', 'exists:bahan_bakus,id'],
             'multiplier' => ['required', 'integer', 'min:1'],
-            'qty' => ['required', 'numeric', 'min:0'],
+            'total_kg' => ['required', 'numeric', 'min:0'],
         ]);
 
         $exists = ProductFormula::where('product_id', $product->id)
@@ -45,7 +45,7 @@ class ProductFormulaController extends Controller
             return back()->withInput()->with('error', 'Kombinasi bahan baku + multiplier ini sudah ada.');
         }
 
-        $product->formulas()->create($request->only('bahan_baku_id', 'multiplier', 'qty'));
+        $product->formulas()->create($request->only('bahan_baku_id', 'multiplier', 'total_kg'));
 
         return back()->with('success', 'Formula berhasil ditambahkan.');
     }
@@ -54,9 +54,9 @@ class ProductFormulaController extends Controller
     {
         $formula = ProductFormula::findOrFail($id);
 
-        $request->validate(['qty' => ['required', 'numeric', 'min:0']]);
+        $request->validate(['total_kg' => ['required', 'numeric', 'min:0']]);
 
-        $formula->update(['qty' => $request->qty]);
+        $formula->update(['total_kg' => $request->total_kg]);
 
         return back()->with('success', 'Formula berhasil diupdate.');
     }
@@ -66,6 +66,19 @@ class ProductFormulaController extends Controller
         ProductFormula::findOrFail($id)->delete();
 
         return back()->with('success', 'Formula berhasil dihapus.');
+    }
+
+
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:product_formulas,id'],
+        ]);
+
+        $count = ProductFormula::whereIn('id', $request->ids)->delete();
+
+        return back()->with('success', "{$count} formula berhasil dihapus.");
     }
 
     public function getBahanBakuByProduct($productId)

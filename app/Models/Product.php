@@ -15,4 +15,9 @@ class Product extends Model
     {
         return $this->hasMany(ProductFormula::class);
     }
+
+    public function standarParameterProduks()
+    {
+        return $this->hasMany(StandarParameterProduk::class);
+    }
 }

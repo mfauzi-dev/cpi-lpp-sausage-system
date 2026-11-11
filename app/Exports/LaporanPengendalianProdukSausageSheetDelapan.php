@@ -16,7 +16,7 @@ class LaporanPengendalianProdukSausageSheetDelapan extends LaporanPengendalianPr
         $row = $this->table(
             $sheet,
             $row,
-            null,
+            'PACKING LUAR',
             [
                 'Proses Freezing',
                 'Jumlah Input',
@@ -55,7 +55,7 @@ class LaporanPengendalianProdukSausageSheetDelapan extends LaporanPengendalianPr
         $row = $this->table(
             $sheet,
             $row,
-            null,
+            'PENGEMASAN PACKING LUAR',
             [
                 'Parameter Packing Luar',
                 'No. Mesin',
@@ -83,6 +83,10 @@ class LaporanPengendalianProdukSausageSheetDelapan extends LaporanPengendalianPr
                 ->all()
         );
 
+        // Judul untuk tabel vertikal (Sampling Packing Luar)
+        $this->sectionTitle($sheet, $row, 'SAMPLING PACKING LUAR');
+        $row++;
+
         $row = $this->verticalTable(
             $sheet,
             $row,
@@ -99,7 +103,7 @@ class LaporanPengendalianProdukSausageSheetDelapan extends LaporanPengendalianPr
         $row = $this->table(
             $sheet,
             $row,
-            null,
+            'REKAPITULASI PACKING LUAR',
             [
                 'Jumlah Batch',
                 'Jumlah Pack',
@@ -133,10 +137,10 @@ class LaporanPengendalianProdukSausageSheetDelapan extends LaporanPengendalianPr
                 ->all()
         );
 
-        return $this->table(
+        $row = $this->table(
             $sheet,
             $row,
-            null,
+            'KARTON BOX PACKING LUAR',
             ['Jenis Karton Box', 'Qty Box', 'Pemakaian', 'Sisa', 'Reject'],
             $pb->kartonBoxPackingLuar
                 ->map(fn ($k) => [
@@ -147,7 +151,29 @@ class LaporanPengendalianProdukSausageSheetDelapan extends LaporanPengendalianPr
                     $this->number($k->reject),
                 ])
                 ->values()
-                ->all() 
+                ->all()
         );
+
+        // Gambar: Kartu Rute | Stamp Box | ED Carton Box dalam satu baris.
+        // Lebar dibagi sesuai 'weight' (ubah angkanya kalau mau proporsi lain).
+        $gambarItems = [
+            [
+                'title' => 'KARTU RUTE',
+                'field' => 'foto_kartu_rute',
+                'weight' => 3,
+            ],
+            [
+                'title' => 'STAMP BOX',
+                'field' => 'foto_stamp_box',
+                'weight' => 2,
+            ],
+            [
+                'title' => 'ED CARTON BOX',
+                'field' => 'foto_ed_carton_box',
+                'weight' => 2,
+            ],
+        ];
+
+        return $this->stickerRow($sheet, $row, $gambarItems, 8);
     }
 }

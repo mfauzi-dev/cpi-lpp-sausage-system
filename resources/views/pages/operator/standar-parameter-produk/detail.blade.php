@@ -35,51 +35,15 @@
 
             <div class="card mb-4">
                 <div class="card-header">
-                    <h4><span class="step-badge">1</span> Informasi Produksi</h4>
+                    <h4><span class="step-badge">1</span> Informasi Produk</h4>
                 </div>
                 <div class="card-body">
                     <div class="batch-highlight">
                         <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <div class="batch-label">Production Batch</div>
+                            <div class="col-md-12">
+                                <div class="batch-label">Produk</div>
                                 <div class="batch-number">
-                                    {{ $productionBatch->kode_batch ?? '-' }}
-                                </div>
-                                <div class="batch-product">
-                                    {{ $productionBatch->product->name ?? '-' }}
-                                </div>
-                            </div>
-                            <div class="col-md-4 text-md-right mt-3 mt-md-0">
-                                <div class="batch-label">Tanggal Produksi</div>
-                                <div class="batch-number" style="font-size: 1.1rem;">
-                                    {{ $productionBatch->tanggal ? \Carbon\Carbon::parse($productionBatch->tanggal)->format('d M Y') : '-' }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <div class="info-box">
-                                <div class="info-label">Kode Batch</div>
-                                <div class="info-value">
-                                    {{ $productionBatch->kode_batch ?? '-' }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="info-box">
-                                <div class="info-label">Shift</div>
-                                <div class="info-value">
-                                    {{ $productionBatch->shift ? 'Shift ' . $productionBatch->shift : '-' }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="info-box">
-                                <div class="info-label">Product</div>
-                                <div class="info-value">
-                                    {{ $productionBatch->product->name ?? '-' }}
+                                    {{ $product->name ?? '-' }}
                                 </div>
                             </div>
                         </div>
