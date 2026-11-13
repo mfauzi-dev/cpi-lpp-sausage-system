@@ -18,7 +18,7 @@ class LaporanPengendalianProdukSausageSheetSatu extends LaporanPengendalianProdu
                 $sheet,
                 $row,
                 'PRODUKSI BAHAN BAKU',
-                ['Bahan Baku', 'Kode Batch', 'Best Before', 'Total Kg', 'Suhu RM', 'Formula'],
+                ['Bahan Baku', 'Formula', 'Total Kg', 'Kode Batch', 'Best Before', 'Suhu RM'],
                 []
             );
         }
@@ -36,12 +36,11 @@ class LaporanPengendalianProdukSausageSheetSatu extends LaporanPengendalianProdu
             $rows = $record->items
                 ->map(fn ($item) => [
                     $this->val($item->bahanBaku->name ?? null),
+                    $this->val($item->productFormula->multiplier ?? null),
+                    $this->number($item->productFormula->total_kg),
                     $this->val($item->kode_batch),
                     $this->date($item->best_before),
-                    $this->number($item->total_kg),
                     $this->number($item->suhu_rm),
-                    // Sesuaikan kolom formula kalau bukan `qty`
-                    $this->number($item->productFormula->qty ?? null),
                 ])
                 ->values()
                 ->all();
@@ -50,7 +49,7 @@ class LaporanPengendalianProdukSausageSheetSatu extends LaporanPengendalianProdu
                 $sheet,
                 $row,
                 $judul,
-                ['Bahan Baku', 'Kode Batch', 'Best Before', 'Total Kg', 'Suhu RM', 'Formula'],
+                ['Bahan Baku', 'Formula', 'Total Kg', 'Kode Batch', 'Best Before','Suhu RM',],
                 $rows
             );
 
